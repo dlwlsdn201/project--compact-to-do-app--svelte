@@ -1,10 +1,9 @@
 <script lang="ts">
 	import type { Todo, Priority } from '$lib/types/todo';
 	import { useUpdateTodo, useDeleteTodo } from '$lib/features/todo/todoQueries';
-	import { slide, fade } from 'svelte/transition';
 	import { Trash2 } from 'lucide-svelte';
 
-	let { todo } = $props<{ todo: Todo }>();
+	let { todo, showDate = false } = $props<{ todo: Todo; showDate?: boolean }>();
 
 	const updateTodo = useUpdateTodo();
 	const deleteTodo = useDeleteTodo();
@@ -30,7 +29,6 @@
 </script>
 
 <div
-	out:slide={{ duration: 200 }}
 	class="group relative flex items-start gap-3 p-4 mb-3 rounded-xl border bg-card transition-all hover:shadow-md 
 	{todo.is_completed ? 'bg-muted/50 border-transparent shadow-none' : 'border-border shadow-sm'}"
 >
@@ -43,7 +41,6 @@
 		>
 			{#if todo.is_completed}
 				<svg
-					in:fade={{ duration: 100 }}
 					xmlns="http://www.w3.org/2000/svg"
 					viewBox="0 0 24 24"
 					fill="none"
@@ -60,16 +57,13 @@
 	</div>
 
 	<div class="flex-1 w-full flex flex-col gap-1 items-start justify-center">
-		<div class="flex items-center gap-2 w-full justify-between">
+		<div class="flex items-center gap-2 w-full pr-6">
 			<h3
 				class="text-base font-semibold leading-none tracking-tight transition-all
 				{todo.is_completed ? 'line-through text-muted-foreground' : 'text-foreground'}"
 			>
 				{todo.title}
 			</h3>
-			<span class="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase {priorityColors[todo.priority as Priority]}">
-				{todo.priority}
-			</span>
 		</div>
 		
 		{#if todo.content}
@@ -78,13 +72,20 @@
 			</p>
 		{/if}
 		
-		<div class="text-[10px] text-muted-foreground mt-1 font-medium">
-			{new Date(todo.created_at).toLocaleDateString('ko-KR')}
+		<div class="flex items-center gap-2 mt-1">
+			{#if showDate}
+				<div class="text-[10px] text-muted-foreground font-medium">
+					{new Date(todo.created_at).toLocaleDateString('ko-KR')}
+				</div>
+			{/if}
+			<span class="text-[10px] font-bold px-2 py-0.5 rounded-[4px] {priorityColors[todo.priority as Priority]}">
+				{todo.priority === 'high' ? '우선순위 높음' : todo.priority === 'medium' ? '우선순위 보통' : '우선순위 낮음'}
+			</span>
 		</div>
 	</div>
 
 	<button
-		class="opacity-0 group-hover:opacity-100 transition-opacity absolute right-4 top-4 p-1.5 rounded-md hover:bg-destructive/10 hover:text-destructive text-muted-foreground focus:opacity-100"
+		class="absolute right-4 top-4 p-1.5 rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
 		onclick={handleDelete}
 		aria-label="Delete todo"
 	>

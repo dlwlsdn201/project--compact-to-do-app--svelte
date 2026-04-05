@@ -9,6 +9,16 @@
 
 	let filteredTodos = $derived(
 		(todosQuery.data || []).filter((todo: Todo) => {
+			const todoDate = new Date(todo.created_at);
+			const today = new Date();
+			
+			// Only show past dates (before today)
+			const isPastDate = todoDate.getFullYear() < today.getFullYear() ||
+							   (todoDate.getFullYear() === today.getFullYear() && todoDate.getMonth() < today.getMonth()) ||
+							   (todoDate.getFullYear() === today.getFullYear() && todoDate.getMonth() === today.getMonth() && todoDate.getDate() < today.getDate());
+
+			if (!isPastDate) return false;
+
 			if (!searchQuery) return true;
 			return todo.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
 				   (todo.content && todo.content.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -41,7 +51,7 @@
 	{:else}
 		<div class="mt-4 flex flex-col w-full">
 			{#each filteredTodos as todo (todo.id)}
-				<TodoItem {todo} />
+				<TodoItem {todo} showDate={true} />
 			{:else}
 				<div class="py-12 flex flex-col items-center justify-center text-center text-muted-foreground bg-muted/20 rounded-xl mt-2 border border-dashed">
 					<p class="text-sm font-medium">검색 결과가 없습니다.</p>

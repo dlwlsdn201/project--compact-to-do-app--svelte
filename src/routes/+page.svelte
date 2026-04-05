@@ -2,7 +2,6 @@
 	import { useTodos } from '$lib/features/todo/todoQueries';
 	import TodoItem from '$lib/components/ui/TodoItem.svelte';
 	import TodoFormModal from '$lib/components/ui/TodoFormModal.svelte';
-	import { slide } from 'svelte/transition';
 	import type { Todo } from '$lib/types/todo';
 
 	const todosQuery = useTodos();
@@ -19,9 +18,11 @@
 
 	let filteredTodos = $derived(
 		(todosQuery.data || []).filter((todo: Todo) => {
-			// For mockup simplicity, assume we handle all if it's not due_date constrained
-			// In real app, only show where due_date == todayString or created_at matches today
-			return true; 
+			const todoDate = new Date(todo.created_at);
+			const today = new Date();
+			return todoDate.getDate() === today.getDate() &&
+				   todoDate.getMonth() === today.getMonth() &&
+				   todoDate.getFullYear() === today.getFullYear();
 		})
 	);
 
@@ -35,7 +36,7 @@
 			<h1 class="text-2xl font-bold tracking-tight">오늘 할 일</h1>
 			<p class="text-sm text-muted-foreground mt-1">오늘 끝내야 할 일들에 집중하세요.</p>
 		</div>
-		<div class="text-4xl">🔥</div>
+		<div class="text-4xl">🚩</div>
 	</div>
 
 	{#if todosQuery.isLoading}
