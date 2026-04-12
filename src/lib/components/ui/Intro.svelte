@@ -22,12 +22,12 @@
 
 	<div class="flex-1 flex flex-col items-center justify-center p-6 gap-10">
 		<div class="flex flex-col items-center justify-center text-center space-y-4">
-			<div class="w-20 h-20 bg-yellow-500 rounded-2xl flex items-center justify-center shadow-lg mb-4 text-black text-4xl shadow-yellow-500/20">
-				⚡
+			<div class="rounded-2xl flex items-center justify-center shadow-lg text-black text-4xl shadow-yellow-500/20">
+				<img src="/icon-192.png" alt="Logo" />
 			</div>
 			<h1 class="text-5xl font-extrabold tracking-tight flex items-center justify-center gap-1">
-				<span class="text-yellow-500">Flash</span>
-				<span>Do</span>
+				<span class="text-yellow-500">Todo</span>
+				<span>morrow</span>
 			</h1>
 			<p class="text-muted-foreground font-medium mt-2">당신의 빠르고 심플한 하루의 끝!</p>
 		</div>
