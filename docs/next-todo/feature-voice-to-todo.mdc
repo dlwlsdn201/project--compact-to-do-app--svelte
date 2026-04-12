@@ -1,0 +1,58 @@
+---
+description: Voice to Todo Feature PRD
+globs: 
+---
+# 🎙️ PRD: 음성 기반 투두 자동 등록 (Voice-to-Todo)
+
+본 문서는 사용자의 음성을 인식하고 인공지능(LLM)을 통해 의도를 분석하여, [오늘] 또는 [내일] 탭에 자동으로 할 일(To-Do)을 등록하는 신규 기능의 제품 요구사항 및엔지니어링 플랜입니다.
+
+## 1. 개요 (Overview)
+- **목표**: 타이핑 없이 모바일이나 웹에서 음성만으로 직관적이고 빠르게 투두를 등록할 수 있는 사용자 경험(UX) 제공.
+- **핵심 기술 스택**: 
+  - SvelteKit (Frontend & Server Routes)
+  - Web Speech API (무료 Web-native STT) 또는 OpenAI Whisper API
+  - OpenAI API (GPT-4o-mini 등, STT 텍스트 구조화 파싱용)
+  - Supabase (기존 Database API 연동)
+
+---
+
+## 2. 핵심 기능 요구사항 (Core Requirements)
+
+### 2.1. 사용자 인터페이스 (UI/UX)
+- **플로팅 마이크 버튼**: 하단 네비게이션 바 근처 혹은 `+` 등록 버튼 옆에 직관적인 음성 인식 시작(마이크) 버튼이 존재해야 함.
+- **상태 피드백 (시각적/청각적)**: 
+  - 녹음 대기 중, 녹음 진행 중(파형이나 펄스 효과), 처리 중(Loading 스피너) 상태를 명확히 구분하여 보여주어야 함.
+- **결과 알림 (Toast/Snackbar)**: 등록 성공 시 "N개의 투두가 [오늘/내일] 탭에 등록되었습니다." 라는 토스트 알림 노출.
+
+### 2.2. 데이터 처리 및 인공지능 (AI & Processing)
+- **음성 인식 (STT)**: 
+  - 1차 권장: 기기에 내장된 브라우저 레벨의 `Web Speech API` 활용 (서버 리소스 제로, 무료 처리).
+  - 2차 권장: 정확도 이슈 발생 시 `Whisper API` 적용.
+- **텍스트 파싱 (LLM 의도 분석)**: 
+  - 프론트엔드가 아닌 SvelteKit의 보안된 `+server.ts` 라우트를 통해 LLM(OpenAI)에 요청 전송 (API Key 탈취 방지 목적).
+  - **LLM 프롬프트 설계 규칙**:
+    - 입력값: "내일 오전 회의 준비하고 오늘 저녁에 우유 사오기"
+    - 결과 형식 (Strict JSON Array): 
+      ```json
+      [
+        {"title": "회의 준비하기", "tab": "tomorrow", "priority": "high"},
+        {"title": "우유 사오기", "tab": "today", "priority": "low"}
+      ]
+      ```
+
+---
+
+## 3. 엔지니어링 구현 플랜 (Implementation Plan)
+
+### Phase 1: 기반 아키텍처 및 서버 라우트 구성
+- [NEW] `src/routes/api/voice-parse/+server.ts`: LLM(OpenAI SDK)을 연동하는 파싱 프록시 엔드포인트 생성.
+- 시스템 프롬프트 엔지니어링 작성 및 테스트 (JSON 포맷 강제화).
+
+### Phase 2: 클라이언트 음성 인터페이스 구축
+- [NEW] `src/lib/components/ui/VoiceRecorder.svelte`: Web Speech API를 활용하는 마이크 제어 및 레코딩 컴포넌트 생성.
+- 녹음 시작/중지 및 실시간 상태(State) 관리 로직 `svelte.ts` 유틸리티로 캡슐화.
+
+### Phase 3: Supabase API 연동 및 상태 업데이트
+- [MODIFY] `src/lib/features/todo/todoQueries.ts`: 또는 내부 컴포넌트 로직
+- 파싱되어 돌아온 JSON Array 데이터를 수신한 후, 기존에 제작된 `useCreateTodo` API를 순회하며(Bulk) Supabase Database에 투두 Insert.
+- `invalidateQueries`를 통해 [오늘], [내일] 탭 뷰 실시간 리렌더링.
