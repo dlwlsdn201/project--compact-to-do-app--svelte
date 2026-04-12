@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { useTodos } from '$lib/features/todo/todoQueries';
 	import TodoItem from '$lib/components/ui/TodoItem.svelte';
+	import TodoSkeleton from '$lib/components/ui/TodoSkeleton.svelte';
 	import TodoFormModal from '$lib/components/ui/TodoFormModal.svelte';
 	import type { Todo } from '$lib/types/todo';
 	import { isTomorrow, getTomorrowDateString } from '$lib/utils/date';
@@ -56,8 +57,8 @@
 	</div>
 
 	{#if todosQuery.isLoading}
-		<div class="h-32 flex items-center justify-center text-muted-foreground">
-			데이터를 불러오는 중입니다...
+		<div class="mt-4">
+			<TodoSkeleton />
 		</div>
 	{:else if todosQuery.isError}
 		<div class="h-32 flex items-center justify-center text-destructive">

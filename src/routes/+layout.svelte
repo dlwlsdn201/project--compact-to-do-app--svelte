@@ -1,12 +1,13 @@
 <script lang="ts">
 	import '../app.css';
-	import { injectAnalytics } from '@vercel/analytics';
+	import { inject } from '@vercel/analytics';
 	import { dev } from '$app/environment';
 	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
 	import { themeStore } from '$lib/features/theme/themeStore.svelte';
 	import { authStore } from '$lib/features/auth/authStore.svelte';
 	import { onMount } from 'svelte';
 	import Header from '$lib/components/ui/Header.svelte';
+	import TodoSkeleton from '$lib/components/ui/TodoSkeleton.svelte';
 	import BottomNav from '$lib/components/ui/BottomNav.svelte';
 	import Intro from '$lib/components/ui/Intro.svelte';
 
@@ -15,7 +16,7 @@
 	const queryClient = new QueryClient();
 
 	onMount(() => {
-		injectAnalytics({ mode: dev ? 'development' : 'production' });
+		inject({ mode: dev ? 'development' : 'production' });
 		themeStore.init();
 		authStore.init();
 	});
@@ -23,22 +24,32 @@
 
 <QueryClientProvider client={queryClient}>
 	{#if !authStore.isInitialized}
-		<div class="min-h-[100dvh] flex items-center justify-center bg-background text-foreground">
-			<!-- 동적 로딩 애니메이션 (라이브러리 스타일) -->
-			<div class="flex flex-col items-center gap-4">
-				<div class="relative flex items-center justify-center w-16 h-16">
-					<!-- 배경 링 -->
-					<div class="absolute inset-0 border-4 border-muted/30 rounded-full"></div>
-					<!-- 회전하는 스피너 -->
-					<div class="absolute inset-0 border-4 border-yellow-500/80 rounded-full border-t-transparent animate-spin"></div>
-					<!-- 안쪽 아이콘 -->
-					<div class="animate-pulse flex items-center justify-center h-full">
-						<span class="text-yellow-500 text-2xl drop-shadow-[0_0_8px_rgba(234,179,8,0.5)]">⚡</span>
-					</div>
+		<div class="min-h-[100dvh] bg-background text-foreground pb-16 flex flex-col items-center">
+			<!-- Header placeholder -->
+			<div class="sticky top-0 z-50 w-full border-b bg-background/95 h-14 flex items-center justify-between px-4 max-w-2xl mx-auto">
+				<div class="flex items-center gap-2 animate-pulse">
+					<div class="w-24 h-6 bg-muted/40 rounded"></div>
+					<div class="w-10 h-4 bg-muted/20 rounded"></div>
 				</div>
-				<span class="font-medium tracking-widest text-sm text-foreground/70 animate-pulse">
-					LOADING...
-				</span>
+				<div class="w-9 h-9 bg-muted/20 rounded-md animate-pulse"></div>
+			</div>
+			
+			<main class="flex-1 w-full max-w-2xl px-4 py-4 md:py-8">
+				<div class="mb-8 animate-pulse">
+					<div class="h-8 bg-muted/40 rounded w-1/3 mb-2"></div>
+					<div class="h-4 bg-muted/20 rounded w-1/2"></div>
+				</div>
+				<TodoSkeleton />
+			</main>
+
+			<!-- BottomNav placeholder -->
+			<div class="fixed bottom-0 left-0 right-0 h-16 border-t bg-background/95 flex items-center justify-around px-4">
+				{#each Array(3) as _}
+					<div class="flex flex-col items-center gap-1 animate-pulse">
+						<div class="w-6 h-6 bg-muted/30 rounded-full"></div>
+						<div class="w-8 h-2 bg-muted/20 rounded"></div>
+					</div>
+				{/each}
 			</div>
 		</div>
 	{:else if !authStore.user}
