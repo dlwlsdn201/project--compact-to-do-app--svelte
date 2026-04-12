@@ -43,12 +43,15 @@
 			</main>
 
 			<!-- BottomNav placeholder -->
-			<div class="fixed bottom-0 left-0 right-0 h-16 border-t bg-background/95 flex items-center justify-around px-4">
-				{#each Array(3) as _}
+			<div class="fixed bottom-0 left-0 right-0 h-20 border-t-[0.5px] border-border/50 bg-background/95 flex items-center justify-around px-4 pb-[env(safe-area-inset-bottom)]">
+				{#each Array(3) as _, i}
 					<div class="flex flex-col items-center gap-1 animate-pulse">
 						<div class="w-6 h-6 bg-muted/30 rounded-full"></div>
 						<div class="w-8 h-2 bg-muted/20 rounded"></div>
 					</div>
+					{#if i < 2}
+						<div class="w-[1.5px] h-5 bg-border/40 animate-pulse"></div>
+					{/if}
 				{/each}
 			</div>
 		</div>
@@ -57,7 +60,7 @@
 		<Intro />
 	{:else}
 		<!-- 로그인이 완료된 경우의 실 기능들 (Header, Main, BottomNav 렌더링) -->
-		<div class="min-h-[100dvh] bg-background text-foreground pb-16 flex flex-col items-center">
+		<div class="min-h-[100dvh] bg-background text-foreground pb-24 flex flex-col items-center">
 			<Header />
 			<main class="flex-1 w-full max-w-2xl px-4 py-4 md:py-8">
 				{@render children()}

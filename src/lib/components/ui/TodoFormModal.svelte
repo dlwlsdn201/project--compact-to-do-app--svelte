@@ -95,12 +95,12 @@
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
-		class="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 transition-all"
+		class="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm flex items-start sm:items-center justify-center p-4 pt-16 sm:pt-4 transition-all"
 		onclick={close}
 	>
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<div
-			class="bg-card text-card-foreground border rounded-t-2xl sm:rounded-2xl w-full max-w-md shadow-lg flex flex-col pt-2"
+			class="bg-card text-card-foreground border rounded-2xl w-full max-w-md shadow-lg flex flex-col pt-2"
 			onclick={(e) => e.stopPropagation()}
 			in:slide={{ duration: 250, axis: 'y' }}
 			out:slide={{ duration: 200, axis: 'y' }}

@@ -36,7 +36,7 @@
 <div class="w-full flex flex-col gap-4">
 	<div class="flex items-center justify-between pb-2 border-b">
 		<div>
-			<h1 class="text-2xl font-bold tracking-tight">오늘 할 일</h1>
+			<h1 class="text-2xl font-bold tracking-tight">오늘 할 일 🚩</h1>
 			<p class="text-sm text-muted-foreground mt-1">오늘 끝내야 할 일들에 집중하세요.</p>
 		</div>
 		<div class="flex items-center gap-2">
@@ -47,7 +47,6 @@
 				<option value="priority-desc">우선순위 역순 (높은순)</option>
 				<option value="priority-asc">우선순위 (낮은순)</option>
 			</select>
-			<div class="text-4xl">🚩</div>
 		</div>
 	</div>
 
