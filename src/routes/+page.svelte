@@ -9,7 +9,18 @@
 	const todosQuery = useTodos();
 	
 	let isModalOpen = $state(false);
+	let editingTodo = $state<Todo | null>(null);
 	let sortOrder = $state<SortOrder>('priority-desc');
+
+	function openCreateModal() {
+		editingTodo = null;
+		isModalOpen = true;
+	}
+
+	function handleEdit(t: Todo) {
+		editingTodo = t;
+		isModalOpen = true;
+	}
 
 	let filteredTodos = $derived(
 		(todosQuery.data || []).filter((todo: Todo) => isToday(todo.due_date))
@@ -57,14 +68,14 @@
 			{/if}
 
 			{#each uncompletedTodos as todo (todo.id)}
-				<TodoItem {todo} />
+				<TodoItem {todo} onEdit={handleEdit} />
 			{/each}
 
 			{#if completedTodos.length > 0}
 				<h2 class="text-sm font-semibold text-muted-foreground mt-6 mb-3 tracking-wide">완료된 항목</h2>
 				<div class="flex flex-col">
 					{#each completedTodos as todo (todo.id)}
-						<TodoItem {todo} />
+						<TodoItem {todo} onEdit={handleEdit} />
 					{/each}
 				</div>
 			{/if}
@@ -77,9 +88,9 @@
 	class="fixed bottom-24 right-6 sm:right-[calc(50%-18rem)] md:right-[calc(50%-16rem)] 
 	w-14 h-14 bg-yellow-500 text-black hover:bg-yellow-400 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-105 active:scale-95"
 	aria-label="Add Todo"
-	onclick={() => (isModalOpen = true)}
+	onclick={openCreateModal}
 >
 	<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
 </button>
 
-<TodoFormModal bind:isOpen={isModalOpen} defaultDate={new Date().toISOString()} />
+<TodoFormModal bind:isOpen={isModalOpen} {editingTodo} defaultDate={new Date().toISOString()} />

@@ -21,10 +21,21 @@
 <QueryClientProvider client={queryClient}>
 	{#if !authStore.isInitialized}
 		<div class="min-h-[100dvh] flex items-center justify-center bg-background text-foreground">
-			<!-- 간소화된 스플래시 로딩 애니메이션 -->
-			<div class="flex flex-col items-center animate-pulse opacity-70">
-				<span class="text-yellow-500 text-3xl mb-2">⚡</span>
-				<span class="font-bold tracking-tight">Loading...</span>
+			<!-- 동적 로딩 애니메이션 (라이브러리 스타일) -->
+			<div class="flex flex-col items-center gap-4">
+				<div class="relative flex items-center justify-center w-16 h-16">
+					<!-- 배경 링 -->
+					<div class="absolute inset-0 border-4 border-muted/30 rounded-full"></div>
+					<!-- 회전하는 스피너 -->
+					<div class="absolute inset-0 border-4 border-yellow-500/80 rounded-full border-t-transparent animate-spin"></div>
+					<!-- 안쪽 아이콘 -->
+					<div class="animate-pulse flex items-center justify-center h-full">
+						<span class="text-yellow-500 text-2xl drop-shadow-[0_0_8px_rgba(234,179,8,0.5)]">⚡</span>
+					</div>
+				</div>
+				<span class="font-medium tracking-widest text-sm text-foreground/70 animate-pulse">
+					LOADING...
+				</span>
 			</div>
 		</div>
 	{:else if !authStore.user}

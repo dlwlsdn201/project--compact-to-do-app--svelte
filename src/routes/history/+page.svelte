@@ -1,12 +1,21 @@
 <script lang="ts">
 	import { useTodos } from '$lib/features/todo/todoQueries';
 	import TodoItem from '$lib/components/ui/TodoItem.svelte';
+	import TodoFormModal from '$lib/components/ui/TodoFormModal.svelte';
 	import type { Todo } from '$lib/types/todo';
 	import { isPast } from '$lib/utils/date';
 	import { History } from 'lucide-svelte';
 
 	const todosQuery = useTodos();
 	let searchQuery = $state('');
+	
+	let isModalOpen = $state(false);
+	let editingTodo = $state<Todo | null>(null);
+
+	function handleEdit(t: Todo) {
+		editingTodo = t;
+		isModalOpen = true;
+	}
 
 	let filteredTodos = $derived(
 		(todosQuery.data || []).filter((todo: Todo) => {
@@ -65,7 +74,7 @@
 					</h2>
 					<div class="flex flex-col mb-6">
 						{#each uncompletedTodos as todo (todo.id)}
-							<TodoItem {todo} showDate={true} isHistoryArea={true} />
+							<TodoItem {todo} showDate={true} isHistoryArea={true} onEdit={handleEdit} />
 						{/each}
 					</div>
 				{/if}
@@ -74,7 +83,7 @@
 					<h2 class="text-sm font-semibold text-muted-foreground mb-3 tracking-wide border-t pt-6">과거 완료된 항목</h2>
 					<div class="flex flex-col opacity-80">
 						{#each completedTodos as todo (todo.id)}
-							<TodoItem {todo} showDate={true} isHistoryArea={true} />
+							<TodoItem {todo} showDate={true} isHistoryArea={true} onEdit={handleEdit} />
 						{/each}
 					</div>
 				{/if}
@@ -82,3 +91,5 @@
 		</div>
 	{/if}
 </div>
+
+<TodoFormModal bind:isOpen={isModalOpen} {editingTodo} defaultDate={editingTodo?.due_date || new Date().toISOString()} />

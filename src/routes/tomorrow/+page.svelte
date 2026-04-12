@@ -10,7 +10,18 @@
 	const todosQuery = useTodos();
 	
 	let isModalOpen = $state(false);
+	let editingTodo = $state<Todo | null>(null);
 	let sortOrder = $state<SortOrder>('priority-desc');
+
+	function openCreateModal() {
+		editingTodo = null;
+		isModalOpen = true;
+	}
+
+	function handleEdit(t: Todo) {
+		editingTodo = t;
+		isModalOpen = true;
+	}
 
 	const tomorrowString = getTomorrowDateString();
 
@@ -62,14 +73,14 @@
 			{/if}
 
 			{#each uncompletedTodos as todo (todo.id)}
-				<TodoItem {todo} />
+				<TodoItem {todo} onEdit={handleEdit} />
 			{/each}
 
 			{#if completedTodos.length > 0}
 				<h2 class="text-sm font-semibold text-muted-foreground mt-6 mb-3 tracking-wide">완료된 항목</h2>
 				<div class="flex flex-col">
 					{#each completedTodos as todo (todo.id)}
-						<TodoItem {todo} />
+						<TodoItem {todo} onEdit={handleEdit} />
 					{/each}
 				</div>
 			{/if}
@@ -82,9 +93,9 @@
 	class="fixed bottom-24 right-6 sm:right-[calc(50%-18rem)] md:right-[calc(50%-16rem)] 
 	w-14 h-14 bg-blue-500 text-white hover:bg-blue-600 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-105 active:scale-95"
 	aria-label="Add Tomorrow Todo"
-	onclick={() => (isModalOpen = true)}
+	onclick={openCreateModal}
 >
 	<Plus class="w-6 h-6" />
 </button>
 
-<TodoFormModal bind:isOpen={isModalOpen} defaultDate={tomorrowString} />
+<TodoFormModal bind:isOpen={isModalOpen} {editingTodo} defaultDate={tomorrowString} />

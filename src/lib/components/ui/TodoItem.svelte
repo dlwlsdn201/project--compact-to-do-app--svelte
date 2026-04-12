@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { Todo, Priority } from '$lib/types/todo';
 	import { useUpdateTodo, useDeleteTodo } from '$lib/features/todo/todoQueries';
-	import { Trash2 } from 'lucide-svelte';
+	import { Trash2, Pencil } from 'lucide-svelte';
 
-	let { todo, showDate = false, isHistoryArea = false } = $props<{ todo: Todo; showDate?: boolean; isHistoryArea?: boolean }>();
+	let { todo, showDate = false, isHistoryArea = false, onEdit } = $props<{ todo: Todo; showDate?: boolean; isHistoryArea?: boolean; onEdit?: (todo: Todo) => void }>();
 
 	const updateTodo = useUpdateTodo();
 	const deleteTodo = useDeleteTodo();
@@ -100,7 +100,7 @@
 		</div>
 	</div>
 
-	<div class="flex flex-col sm:flex-row items-end sm:items-center gap-2 flex-shrink-0 ml-1">
+	<div class="flex flex-col items-end sm:items-center gap-2 flex-shrink-0 ml-1">
 		{#if isHistoryArea && !todo.is_completed}
 			<div class="flex flex-col sm:flex-row gap-1">
 				<button
@@ -118,6 +118,17 @@
 			</div>
 		{/if}
 
+		<div class="flex flex-row w-full justify-end gap-x-1">
+		{#if onEdit}
+			<button
+				class="p-1.5 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring shrink-0"
+				onclick={() => onEdit(todo)}
+				aria-label="Edit todo"
+			>
+				<Pencil class="w-4 h-4" />
+			</button>
+		{/if}
+
 		<button
 			class="p-1.5 rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors focus:outline-none focus:ring-2 focus:ring-ring shrink-0"
 			onclick={handleDelete}
@@ -125,5 +136,6 @@
 		>
 			<Trash2 class="w-4 h-4" />
 		</button>
+		</div>
 	</div>
 </div>

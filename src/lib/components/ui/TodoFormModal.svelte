@@ -1,23 +1,39 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
-	import type { Priority } from '$lib/types/todo';
-	import { useCreateTodo } from '$lib/features/todo/todoQueries';
+	import type { Priority, Todo } from '$lib/types/todo';
+	import { useCreateTodo, useUpdateTodo } from '$lib/features/todo/todoQueries';
 	import { X } from 'lucide-svelte';
 	// Simple Zod integration
 	import { z } from 'zod';
 
-	let { isOpen = $bindable(false), initialData = null, defaultDate = new Date().toISOString() } = $props<{
+	let { isOpen = $bindable(false), editingTodo = null, defaultDate = new Date().toISOString() } = $props<{
 		isOpen: boolean;
-		initialData?: any;
+		editingTodo?: Todo | null;
 		defaultDate?: string;
 	}>();
 
 	const createTodo = useCreateTodo();
+	const updateTodo = useUpdateTodo();
 
 	let title = $state('');
 	let content = $state('');
 	let priority = $state<Priority>('low');
 	let error = $state<string | null>(null);
+
+	$effect(() => {
+		if (isOpen) {
+			if (editingTodo) {
+				title = editingTodo.title;
+				content = editingTodo.content || '';
+				priority = editingTodo.priority as Priority;
+			} else {
+				title = '';
+				content = '';
+				priority = 'low';
+			}
+			error = null;
+		}
+	});
 
 	const schema = z.object({
 		title: z.string().min(1, '제목을 입력해주세요.').max(50, '제목은 50자를 넘을 수 없습니다.'),
@@ -35,23 +51,39 @@
 
 		// Success
 		error = null;
-		createTodo.mutate(
-			{
-				title: result.data.title,
-				content: result.data.content || null,
-				priority: result.data.priority,
-				is_completed: false,
-				due_date: defaultDate
-			},
-			{
-				onSuccess: () => {
-					isOpen = false;
-					title = '';
-					content = '';
-					priority = 'low';
+		
+		if (editingTodo) {
+			updateTodo.mutate(
+				{
+					id: editingTodo.id,
+					updates: {
+						title: result.data.title,
+						content: result.data.content || null,
+						priority: result.data.priority
+					}
+				},
+				{
+					onSuccess: () => {
+						isOpen = false;
+					}
 				}
-			}
-		);
+			);
+		} else {
+			createTodo.mutate(
+				{
+					title: result.data.title,
+					content: result.data.content || null,
+					priority: result.data.priority,
+					is_completed: false,
+					due_date: defaultDate
+				},
+				{
+					onSuccess: () => {
+						isOpen = false;
+					}
+				}
+			);
+		}
 	}
 
 	function close() {
@@ -74,7 +106,7 @@
 			out:slide={{ duration: 200, axis: 'y' }}
 		>
 			<div class="flex items-center justify-between px-4 pb-2 border-b">
-				<h2 class="text-lg font-semibold tracking-tight">새 할 일 추가</h2>
+				<h2 class="text-lg font-semibold tracking-tight">{editingTodo ? '할 일 수정' : '새 할 일 추가'}</h2>
 				<button class="p-2 hover:bg-muted rounded-full" onclick={close}>
 					<X class="w-5 h-5" />
 				</button>
@@ -140,10 +172,10 @@
 
 				<button
 					type="submit"
-					disabled={createTodo.isPending}
+					disabled={createTodo.isPending || updateTodo.isPending}
 					class="mt-4 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 w-full"
 				>
-					{createTodo.isPending ? '저장 중...' : '저장하기'}
+					{createTodo.isPending || updateTodo.isPending ? '저장 중...' : '저장하기'}
 				</button>
 			</form>
 		</div>
