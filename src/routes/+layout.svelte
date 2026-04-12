@@ -1,5 +1,7 @@
 <script lang="ts">
 	import '../app.css';
+	import { injectAnalytics } from '@vercel/analytics';
+	import { dev } from '$app/environment';
 	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
 	import { themeStore } from '$lib/features/theme/themeStore.svelte';
 	import { authStore } from '$lib/features/auth/authStore.svelte';
@@ -13,6 +15,7 @@
 	const queryClient = new QueryClient();
 
 	onMount(() => {
+		injectAnalytics({ mode: dev ? 'development' : 'production' });
 		themeStore.init();
 		authStore.init();
 	});

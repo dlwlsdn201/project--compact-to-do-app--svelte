@@ -2,13 +2,19 @@
 	import { themeStore } from '$lib/features/theme/themeStore.svelte';
 	import { authStore } from '$lib/features/auth/authStore.svelte';
 	import { Sun, Moon } from 'lucide-svelte';
+	import { version } from '$app/environment';
 </script>
 
 <header class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
 	<div class="container flex h-14 items-center max-w-2xl mx-auto px-4 justify-between">
-		<div class="flex items-center">
-			<span class="font-bold text-xl tracking-tight text-yellow-500">Todo</span>
-			<span class="font-semibold text-xl tracking-tight">morrow</span>
+		<div class="flex items-center gap-2">
+			<div class="flex items-center">
+				<span class="font-bold text-xl tracking-tight text-yellow-500">Todo</span>
+				<span class="font-semibold text-xl tracking-tight">morrow</span>
+			</div>
+			<span class="text-[10px] font-bold px-1.5 py-0.5 rounded border border-border bg-muted/50 text-muted-foreground transition-colors hover:text-foreground">
+				v{version}
+			</span>
 		</div>
 		<div class="flex items-center gap-3 md:gap-4">
 			{#if authStore.user}
