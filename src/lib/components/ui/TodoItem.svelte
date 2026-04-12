@@ -72,10 +72,10 @@
 		</button>
 	</div>
 
-	<div class="flex-1 w-full flex flex-col gap-1 items-start justify-center">
-		<div class="flex items-center gap-2 w-full pr-6">
+	<div class="flex-1 min-w-0 flex flex-col gap-1">
+		<div class="flex flex-col w-full">
 			<h3
-				class="text-base font-semibold leading-none tracking-tight transition-all
+				class="text-base font-semibold leading-snug tracking-tight transition-all break-words
 				{todo.is_completed ? 'line-through text-muted-foreground' : 'text-foreground'}"
 			>
 				{todo.title}
@@ -83,12 +83,12 @@
 		</div>
 		
 		{#if todo.content}
-			<p class="text-xs text-muted-foreground line-clamp-2 {todo.is_completed ? 'opacity-60' : ''}">
+			<p class="text-xs text-muted-foreground line-clamp-2 break-words mt-0.5 {todo.is_completed ? 'opacity-60' : ''}">
 				{todo.content}
 			</p>
 		{/if}
 		
-		<div class="flex items-center gap-2 mt-1">
+		<div class="flex items-center gap-2 mt-1.5">
 			{#if showDate}
 				<div class="text-[10px] text-muted-foreground font-medium">
 					{new Date(todo.created_at).toLocaleDateString('ko-KR')}
@@ -100,28 +100,30 @@
 		</div>
 	</div>
 
-	{#if isHistoryArea && !todo.is_completed}
-		<div class="absolute right-12 top-2 flex flex-col gap-1 sm:flex-row sm:right-12 sm:top-4">
-			<button
-				class="px-2 py-1 bg-yellow-100 text-yellow-800 text-[10px] rounded hover:bg-yellow-200 transition-colors dark:bg-yellow-900/40 dark:text-yellow-400 font-medium border border-yellow-200 dark:border-yellow-800"
-				onclick={restoreToToday}
-			>
-				오늘 하기
-			</button>
-			<button
-				class="px-2 py-1 bg-blue-100 text-blue-800 text-[10px] rounded hover:bg-blue-200 transition-colors dark:bg-blue-900/40 dark:text-blue-400 font-medium border border-blue-200 dark:border-blue-800"
-				onclick={restoreToTomorrow}
-			>
-				내일 하기
-			</button>
-		</div>
-	{/if}
+	<div class="flex flex-col sm:flex-row items-end sm:items-center gap-2 flex-shrink-0 ml-1">
+		{#if isHistoryArea && !todo.is_completed}
+			<div class="flex flex-col sm:flex-row gap-1">
+				<button
+					class="px-2 py-1 bg-yellow-100 text-yellow-800 text-[10px] rounded hover:bg-yellow-200 transition-colors dark:bg-yellow-900/40 dark:text-yellow-400 font-medium border border-yellow-200 dark:border-yellow-800 whitespace-nowrap"
+					onclick={restoreToToday}
+				>
+					오늘 하기
+				</button>
+				<button
+					class="px-2 py-1 bg-blue-100 text-blue-800 text-[10px] rounded hover:bg-blue-200 transition-colors dark:bg-blue-900/40 dark:text-blue-400 font-medium border border-blue-200 dark:border-blue-800 whitespace-nowrap"
+					onclick={restoreToTomorrow}
+				>
+					내일 하기
+				</button>
+			</div>
+		{/if}
 
-	<button
-		class="absolute right-4 top-4 p-1.5 rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
-		onclick={handleDelete}
-		aria-label="Delete todo"
-	>
-		<Trash2 class="w-4 h-4" />
-	</button>
+		<button
+			class="p-1.5 rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors focus:outline-none focus:ring-2 focus:ring-ring shrink-0"
+			onclick={handleDelete}
+			aria-label="Delete todo"
+		>
+			<Trash2 class="w-4 h-4" />
+		</button>
+	</div>
 </div>
