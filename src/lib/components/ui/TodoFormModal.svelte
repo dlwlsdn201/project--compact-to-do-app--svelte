@@ -6,9 +6,10 @@
 	// Simple Zod integration
 	import { z } from 'zod';
 
-	let { isOpen = $bindable(false), initialData = null } = $props<{
+	let { isOpen = $bindable(false), initialData = null, defaultDate = new Date().toISOString() } = $props<{
 		isOpen: boolean;
 		initialData?: any;
+		defaultDate?: string;
 	}>();
 
 	const createTodo = useCreateTodo();
@@ -40,7 +41,7 @@
 				content: result.data.content || null,
 				priority: result.data.priority,
 				is_completed: false,
-				due_date: new Date().toISOString()
+				due_date: defaultDate
 			},
 			{
 				onSuccess: () => {

@@ -3,7 +3,7 @@
 	import { useUpdateTodo, useDeleteTodo } from '$lib/features/todo/todoQueries';
 	import { Trash2 } from 'lucide-svelte';
 
-	let { todo, showDate = false } = $props<{ todo: Todo; showDate?: boolean }>();
+	let { todo, showDate = false, isHistoryArea = false } = $props<{ todo: Todo; showDate?: boolean; isHistoryArea?: boolean }>();
 
 	const updateTodo = useUpdateTodo();
 	const deleteTodo = useDeleteTodo();
@@ -19,6 +19,22 @@
 		if (confirm('정말로 이 할 일을 삭제하시겠습니까?')) {
 			deleteTodo.mutate(todo.id as any);
 		}
+	}
+
+	function restoreToToday() {
+		updateTodo.mutate({
+			id: todo.id,
+			updates: { due_date: new Date().toISOString() }
+		} as any);
+	}
+
+	function restoreToTomorrow() {
+		const tomorrow = new Date();
+		tomorrow.setDate(tomorrow.getDate() + 1);
+		updateTodo.mutate({
+			id: todo.id,
+			updates: { due_date: tomorrow.toISOString() }
+		} as any);
 	}
 
 	const priorityColors: Record<Priority, string> = {
@@ -83,6 +99,23 @@
 			</span>
 		</div>
 	</div>
+
+	{#if isHistoryArea && !todo.is_completed}
+		<div class="absolute right-12 top-2 flex flex-col gap-1 sm:flex-row sm:right-12 sm:top-4">
+			<button
+				class="px-2 py-1 bg-yellow-100 text-yellow-800 text-[10px] rounded hover:bg-yellow-200 transition-colors dark:bg-yellow-900/40 dark:text-yellow-400 font-medium border border-yellow-200 dark:border-yellow-800"
+				onclick={restoreToToday}
+			>
+				오늘 하기
+			</button>
+			<button
+				class="px-2 py-1 bg-blue-100 text-blue-800 text-[10px] rounded hover:bg-blue-200 transition-colors dark:bg-blue-900/40 dark:text-blue-400 font-medium border border-blue-200 dark:border-blue-800"
+				onclick={restoreToTomorrow}
+			>
+				내일 하기
+			</button>
+		</div>
+	{/if}
 
 	<button
 		class="absolute right-4 top-4 p-1.5 rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors focus:outline-none focus:ring-2 focus:ring-ring"

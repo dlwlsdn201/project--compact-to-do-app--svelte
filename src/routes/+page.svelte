@@ -3,31 +3,22 @@
 	import TodoItem from '$lib/components/ui/TodoItem.svelte';
 	import TodoFormModal from '$lib/components/ui/TodoFormModal.svelte';
 	import type { Todo } from '$lib/types/todo';
+	import { isToday } from '$lib/utils/date';
+	import { sortTodos, type SortOrder } from '$lib/utils/sort';
 
 	const todosQuery = useTodos();
 	
 	let isModalOpen = $state(false);
-
-	function getTodayDateString() {
-		const d = new Date();
-		// YYYY-MM-DD
-		return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-	}
-
-	const todayString = getTodayDateString();
+	let sortOrder = $state<SortOrder>('priority-desc');
 
 	let filteredTodos = $derived(
-		(todosQuery.data || []).filter((todo: Todo) => {
-			const todoDate = new Date(todo.created_at);
-			const today = new Date();
-			return todoDate.getDate() === today.getDate() &&
-				   todoDate.getMonth() === today.getMonth() &&
-				   todoDate.getFullYear() === today.getFullYear();
-		})
+		(todosQuery.data || []).filter((todo: Todo) => isToday(todo.due_date))
 	);
 
-	let uncompletedTodos = $derived(filteredTodos.filter((t: Todo) => !t.is_completed));
-	let completedTodos = $derived(filteredTodos.filter((t: Todo) => t.is_completed));
+	let sortedFilteredTodos = $derived(sortTodos(filteredTodos, sortOrder));
+
+	let uncompletedTodos = $derived(sortedFilteredTodos.filter((t: Todo) => !t.is_completed));
+	let completedTodos = $derived(sortedFilteredTodos.filter((t: Todo) => t.is_completed));
 </script>
 
 <div class="w-full flex flex-col gap-4">
@@ -36,7 +27,16 @@
 			<h1 class="text-2xl font-bold tracking-tight">오늘 할 일</h1>
 			<p class="text-sm text-muted-foreground mt-1">오늘 끝내야 할 일들에 집중하세요.</p>
 		</div>
-		<div class="text-4xl">🚩</div>
+		<div class="flex items-center gap-2">
+			<select
+				bind:value={sortOrder}
+				class="text-xs bg-muted border-none rounded-md px-2 py-1 text-muted-foreground outline-none focus:ring-1 focus:ring-ring"
+			>
+				<option value="priority-desc">우선순위 역순 (높은순)</option>
+				<option value="priority-asc">우선순위 (낮은순)</option>
+			</select>
+			<div class="text-4xl">🚩</div>
+		</div>
 	</div>
 
 	{#if todosQuery.isLoading}
@@ -82,4 +82,4 @@
 	<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
 </button>
 
-<TodoFormModal bind:isOpen={isModalOpen} />
+<TodoFormModal bind:isOpen={isModalOpen} defaultDate={new Date().toISOString()} />
