@@ -1,0 +1,58 @@
+---
+description: Hybrid App (Capacitor) Conversion PRD
+globs: 
+---
+# 📱 PRD: 하이브리드 앱 전환 (Hybrid App Conversion)
+
+본 문서는 현재 모바일 반응형 및 PWA로 완성된 SvelteKit 투두 애플리케이션을 Capacitor를 활용하여 iOS 및 Android 네이티브 앱으로 래핑(Wrapping)하기 위한 제품 요구사항 및 엔지니어링 플랜입니다.
+
+## 1. 개요 (Overview)
+- **목표**: 기존 코드를 99% 재활용하여 App Store (Apple) 및 Play Store (Google)에 출시 가능한 네이티브 앱 형태의 패키지 생성을 목표로 함.
+- **핵심 기술 스택**: 
+  - Capacitor (`@capacitor/core`, `@capacitor/cli`, `@capacitor/ios`, `@capacitor/android`)
+  - SvelteKit Static Adapter (`@sveltejs/adapter-static`)
+
+---
+
+## 2. 핵심 변경 요구사항 (Core Requirements)
+
+### 2.1. 웹 아키텍처 변경
+- 하이브리드 앱 환경은 파일 시스템(`file://` 혹은 `capacitor://`)에서 구동되므로, 기존 서버 사이드 렌더링(SSR) 어댑터를 **정적 사이트 생성(SSG) 방식**으로 전환해야 한다.
+- `svelte.config.js` 내의 `adapter-auto` 항목을 `adapter-static`으로 교체하고 전역 `prerender` 옵션을 활성화.
+
+### 2.2. 인증 및 로그인 메커니즘 (딥링크 연동)
+- **가장 중요한 허들**: 앱 내부 웹뷰(Webview)에서는 기존의 HTTP 리다이렉트 방식 콜백이 막히거나 튕기는 현상이 발생할 수 있음.
+- Supabase Auth 프로세스가 `com.yourdomain.todo://` 와 같은 **커스텀 URL 스킴(Custom URL Scheme) 및 딥링크**를 인지하고 Vercel이 아닌 네이티브 앱으로 다시 돌아올 수 있도록 카카오/Supabase 설정을 확장해야 함.
+
+### 2.3. 네이티브 UI/UX 연동
+- 상단 상태바(Status Bar) 영역(노치, 다이내믹 아일랜드) 및 하단 홈 인디케이터(Safe Area) 영역이 콘텐츠를 가리지 않도록 `@capacitor/status-bar` 및 CSS `env(safe-area-inset-top)` 설정 적용.
+- (선택 사항) 시스템 Back 버튼(Android) 시 뒤로가기 혹은 앱 종료 로직 처리.
+
+---
+
+## 3. 엔지니어링 구현 플랜 (Implementation Plan)
+
+### Phase 1: Capacitor 환경 구성 및 정적 빌드
+- `pnpm i -D @sveltejs/adapter-static` 설치 및 SvelteKit 어댑터 교체, `fallback: index.html` 설정.
+- `pnpm i @capacitor/core @capacitor/cli` 설치.
+- `npx cap init` 명령어로 캡시터 설정 파일(capacitor.config.json) 생성 및 `webDir`을 `.svelte-kit/output` (또는 `build`) 로 지정.
+
+### Phase 2: 네이티브 플랫폼(iOS/Android) 이식
+- `pnpm i @capacitor/ios @capacitor/android` 모듈 설치.
+- `npx cap add ios`, `npx cap add android` 로 네이티브 코어 라이브러리 폴더 생성.
+- `src/app.html` 및 CSS 파일 내의 네이티브(Safe Area) 패딩 수치 조정.
+
+### Phase 3: Supabase & 카카오 OAuth 딥링크 처리 (난이도: 높음)
+- `@capacitor/app` 플러그인을 설치하여 앱이 실행될 때 넘어오는 딥링크 URL(카카오 로그인 인증 후 튕겨져 들어오는 토큰)을 가로채는(Intercept) 이벤트 리스너(appUrlOpen) 추가.
+- 카카오 디벨로퍼스 및 Supabase Redirect URL 항목에 `capacitor://localhost` 거나 `com.yourdomain.todo://auth` 스킴을 추가로 승인 목록에 등록.
+
+### Phase 4: 컴파일 및 모의 구동
+- `npx cap sync` 커맨드로 웹 코드 갱신본을 네이티브 폴더로 복사.
+- Xcode 및 Android Studio를 통해 로컬 에뮬레이터에서 카카오 로그인이 정상적으로 되돌아오는지 테스트.
+
+---
+
+## 4. Open Questions (의사결정 필요)
+
+- **앱 패키지명(Bundle ID)**: `com.youriy.todoapp` 과 같이 구글/애플 스토어에 등록할 전 세계 고유의 고유 식별자(ID) 명칭 지정 필요.
+- **네이티브 기능 확장**: 차후 푸시 알림(FCM, APNs) 플러그인까지 연동할 것인지, 단순히 웹뷰만 띄워놓을 것인지에 대한 기획안 결의 필요.
