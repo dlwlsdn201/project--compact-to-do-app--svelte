@@ -33,7 +33,7 @@
 		</div>
 
 		<button 
-			class="flex items-center justify-center w-full max-w-sm rounded-[12px] bg-[#FEE500] px-6 py-4 font-bold text-[#000000]/90 transition-transform hover:bg-[#FEE500]/80 hover:scale-[1.02] active:scale-95 shadow-md"
+			class="flex cursor-pointer items-center justify-center w-full max-w-sm rounded-[12px] bg-[#FEE500] px-6 py-4 font-bold text-[#000000]/90 transition-transform hover:bg-[#FEE500]/80 hover:scale-[1.02] active:scale-95 shadow-md"
 			onclick={() => authStore.loginWithKakao()}
 		>
 			<!-- 카카오 심볼 -->
