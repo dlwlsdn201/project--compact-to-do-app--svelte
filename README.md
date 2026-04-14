@@ -1,10 +1,10 @@
-# ✅ Compact To-Do App
+# ✅ Todomorrow
 
-**Compact To-Do App**은 매일의 할 일에 집중하고, 지나간 기록과 다가올 내일을 최소한의 노력으로 관리할 수 있도록 돕는 미니멀리즘 투두(To-Do) 애플리케이션입니다.
+**Todomorrow**은 매일의 할 일에 집중하고, 지나간 기록과 다가올 내일을 최소한의 노력으로 관리할 수 있도록 돕는 미니멀리즘 투두(To-Do) 애플리케이션입니다.
 
 "오늘 할 일", "내일 할 일", "지난 이력"의 세 가지 직관적인 뷰(View)를 제공하여 미완료된 업무를 효과적으로 추적하고 복원할 수 있습니다.
 
-![Project Status](https://img.shields.io/badge/version-1.0.0-blue.svg) ![SvelteKit](https://img.shields.io/badge/SvelteKit-FF3E00?style=flat&logo=svelte&logoColor=white) ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat&logo=supabase&logoColor=white) ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat&logo=tailwind-css&logoColor=white)
+![Project Status](https://img.shields.io/badge/version-1.1.0-blue.svg) ![SvelteKit](https://img.shields.io/badge/SvelteKit-FF3E00?style=flat&logo=svelte&logoColor=white) ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat&logo=supabase&logoColor=white) ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat&logo=tailwind-css&logoColor=white)
 
 ---
 

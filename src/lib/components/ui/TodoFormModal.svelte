@@ -36,7 +36,7 @@
 	});
 
 	const schema = z.object({
-		title: z.string().min(1, '제목을 입력해주세요.').max(50, '제목은 50자를 넘을 수 없습니다.'),
+		title: z.string().min(1, '제목을 입력해주세요.').max(70, '제목은 70자를 넘을 수 없습니다.'),
 		content: z.string().optional(),
 		priority: z.enum(['low', 'medium', 'high'])
 	});
@@ -114,20 +114,37 @@
 
 			<form class="p-4 flex flex-col gap-4" onsubmit={handleSubmit}>
 				<div class="flex flex-col gap-1.5">
-					<label for="title" class="text-sm font-medium">제목</label>
-					<input
-						id="title"
-						type="text"
-						bind:value={title}
-						class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-						placeholder="무엇을 해야 하나요?"
-						required
-						autofocus
-					/>
+					<label for="title" class="text-sm font-medium">
+						<span class="text-xs text-red-500">*</span>
+						제목
+					</label>
+
+					<div class="relative">
+						<input
+							id="title"
+							type="text"
+							bind:value={title}
+							class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 pr-14 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+							placeholder="무엇을 해야 하나요?"
+							maxlength={70}
+							oninput={(e) => {
+								const el = e.currentTarget as HTMLInputElement;
+								if (el.value.length > 70) {
+									el.value = el.value.slice(0, 70);
+									title = el.value;
+								}
+							}}
+							required
+							autofocus
+						/>
+						<span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs pointer-events-none {title.length >= 70 ? 'text-red-500' : 'text-muted-foreground'}">
+							{title.length}/70
+						</span>
+					</div>
 				</div>
 
 				<div class="flex flex-col gap-1.5">
-					<label for="content" class="text-sm font-medium">상세 내용 (선택)</label>
+					<label for="content" class="text-sm font-medium">상세 내용</label>
 					<textarea
 						id="content"
 						bind:value={content}

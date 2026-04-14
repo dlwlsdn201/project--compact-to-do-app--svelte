@@ -10,7 +10,10 @@
 		"skipLibCheck": true,
 		"sourceMap": true,
 		"strict": true,
-		"moduleResolution": "bundler"
+		"moduleResolution": "bundler",
+		// 생성된 .svelte-kit 설정은 `types: ["node"]`만 지정한다. `types`를 지정하면 TS는 나열한 패키지만 로드하므로
+		// `svelte`를 빼면 `*.svelte` 모듈 선언이 빠져 테스트/IDE에서 TS2307이 난다. Kit이 참조하는 vite 환경 타입도 함께 둔다.
+		"types": ["node", "svelte", "vite/client"]
 	}
 	// Path aliases are handled by https://svelte.dev/docs/kit/configuration#alias
 	// except $lib which is handled by https://svelte.dev/docs/kit/configuration#files
