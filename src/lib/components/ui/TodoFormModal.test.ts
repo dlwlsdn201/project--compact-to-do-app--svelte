@@ -64,7 +64,7 @@ describe('TodoFormModal', () => {
 		it('수정 모드에서 editingTodo.title이 입력창에 채워진다', async () => {
 			render(TodoFormModal, { props: { isOpen: true, editingTodo } });
 			await tick(); // $effect 실행 대기
-			const input = screen.getByLabelText('제목') as HTMLInputElement;
+			const input = screen.getByLabelText('* 제목') as HTMLInputElement;
 			expect(input.value).toBe('기존 할 일 제목');
 		});
 	});
@@ -75,7 +75,7 @@ describe('TodoFormModal', () => {
 	describe('Interaction', () => {
 		it('유효한 제목 입력 후 제출 시 createTodo.mutate가 호출된다', async () => {
 			render(TodoFormModal, { props: { isOpen: true, defaultDate: '2026-04-14T00:00:00.000Z' } });
-			const input = screen.getByLabelText('제목');
+			const input = screen.getByLabelText('* 제목');
 			await fireEvent.input(input, { target: { value: '새로운 할 일' } });
 			const form = document.querySelector('form')!;
 			await fireEvent.submit(form);
@@ -128,13 +128,11 @@ describe('TodoFormModal', () => {
 			expect(screen.getByText('제목을 입력해주세요.')).toBeInTheDocument();
 		});
 
-		it('51자 제목 제출 → "제목은 50자를 넘을 수 없습니다." 에러가 표시된다', async () => {
+		it('71자 입력 시 oninput 핸들러가 70자로 잘라낸다', async () => {
 			render(TodoFormModal, { props: { isOpen: true } });
-			const input = screen.getByLabelText('제목');
-			await fireEvent.input(input, { target: { value: 'a'.repeat(51) } });
-			const form = document.querySelector('form')!;
-			await fireEvent.submit(form);
-			expect(screen.getByText('제목은 50자를 넘을 수 없습니다.')).toBeInTheDocument();
+			const input = screen.getByLabelText('* 제목') as HTMLInputElement;
+			await fireEvent.input(input, { target: { value: 'a'.repeat(71) } });
+			expect(input.value).toHaveLength(70);
 		});
 
 		it('제목 미입력 제출 시 createTodo.mutate가 호출되지 않는다', async () => {
@@ -146,11 +144,11 @@ describe('TodoFormModal', () => {
 
 		it('정확히 50자 제목은 에러 없이 createTodo.mutate를 호출한다', async () => {
 			render(TodoFormModal, { props: { isOpen: true } });
-			const input = screen.getByLabelText('제목');
+			const input = screen.getByLabelText('* 제목');
 			await fireEvent.input(input, { target: { value: 'a'.repeat(50) } });
 			const form = document.querySelector('form')!;
 			await fireEvent.submit(form);
-			expect(screen.queryByText('제목은 50자를 넘을 수 없습니다.')).not.toBeInTheDocument();
+			expect(screen.queryByText('제목은 70자를 넘을 수 없습니다.')).not.toBeInTheDocument();
 			expect(mockCreateMutate).toHaveBeenCalled();
 		});
 	});
