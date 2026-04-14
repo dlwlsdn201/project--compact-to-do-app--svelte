@@ -61,9 +61,15 @@
 			tabindex="-1"
 		>
 			<div class="flex shrink-0 items-center justify-between px-4 pb-2 border-b">
+			<div class="flex items-center gap-1">
 				<h2 id={titleId} class="text-lg font-semibold tracking-tight pr-2">
-					v{note.version} - {note.title} ({note.updatedAt})
+					[{note.updatedAt}]
 				</h2>
+				<h3 class="text-muted-foreground">
+					v{note.version} {note.title} 
+				</h3>
+
+			</div>
 				<button
 					type="button"
 					class="p-2 hover:bg-muted rounded-full shrink-0"
