@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { themeStore } from '$lib/features/theme/themeStore.svelte';
 	import { authStore } from '$lib/features/auth/authStore.svelte';
-	import { Sun, Moon } from 'lucide-svelte';
+	import { Sun, Moon, Megaphone } from 'lucide-svelte';
 	import { version } from '$app/environment';
 	import { currentReleaseNotes } from '../../release/releaseNotes';
 	import {
@@ -12,7 +12,7 @@
 	import ReleaseNotesDialog from '$lib/components/ui/ReleaseNotesDialog.svelte';
 
 	/**
-	 * 상단 헤더: 테마·로그아웃·버전 뱃지(릴리즈 노트 다이얼로그 진입).
+	 * 상단 헤더: 테마·로그아웃·버전 뱃지(Megaphone = 릴리즈 노트 진입, 미읽음 시 N 도트).
 	 */
 	let releaseDialogOpen = $state(false);
 	/** undefined: 아직 localStorage 미로드, null: 저장값 없음 */
@@ -46,15 +46,19 @@
 			</div>
 			<button
 				type="button"
-				class="relative text-[10px] font-bold px-1.5 py-0.5 rounded border border-border bg-muted/50 text-muted-foreground transition-colors hover:text-foreground hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+				class="group relative inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded border border-border bg-muted/50 text-muted-foreground transition-colors hover:text-foreground hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 				onclick={openReleaseDialog}
 				aria-label={hasUnreadRelease
-					? `앱 버전 ${version}, 새(New) 릴리즈 안내 미확인`
+					? `앱 버전 ${version}, 릴리즈 노트, 새(New) 안내 미확인`
 					: `앱 버전 ${version}, 릴리즈 노트 보기`}
 			>
 				v{version}
+				<Megaphone 
+					class="h-3.5 w-3.5 shrink-0 opacity-90 group-hover:opacity-100"
+					aria-hidden="true"
+				/>
 				{#if hasUnreadRelease}
-					<!-- 미읽음: N = New. 우측으로 더 밀어 patch 자릿수와 겹침 완화 -->
+					<!-- 미읽음: N = New. 아이콘·텍스트와 겹치지 않게 우상단 고정 -->
 					<span
 						class="absolute -top-1 -right-3 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-0.5 text-[9px] font-extrabold leading-none text-destructive-foreground ring-2 ring-background"
 						aria-hidden="true"
