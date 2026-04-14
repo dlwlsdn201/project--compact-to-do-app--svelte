@@ -18,7 +18,7 @@ export interface ReleaseNote {
 export const currentReleaseNotes: ReleaseNote = {
 	version: '1.1.0',
 	title: '업데이트 내용',
-	updatedAt: '2026-04-14',
+	updatedAt: '2026-04-15',
 	features: [
 		'할 일 제목의 입력 글자 제한을 50자 -> 70자로 늘렸어요.',
 		'할 일 제목의 글자 길이를 눈으로 확인할 수 있어요.',
