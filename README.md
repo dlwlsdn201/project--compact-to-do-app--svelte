@@ -16,7 +16,8 @@
 
 ### Desktop 
 
-<img width="1626" height="1024" alt="Result_데스크탑 화면" src="https://github.com/user-attachments/assets/8f796cd1-08e2-45fa-af5f-a7191743b0cd" />
+<img width="1298" height="814" alt="Result_데스크탑 화면" src="https://github.com/user-attachments/assets/d5e7307b-599b-4e98-9ee5-d5abf3538aef" />
+
 
 ### Mobile 
 
