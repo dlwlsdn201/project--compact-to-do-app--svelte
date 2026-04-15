@@ -1,12 +1,28 @@
 # ✅ Todomorrow
 
-**Todomorrow**은 매일의 할 일에 집중하고, 지나간 기록과 다가올 내일을 최소한의 노력으로 관리할 수 있도록 돕는 미니멀리즘 투두(To-Do) 애플리케이션입니다.
+**Todomorrow**은 매일의 할 일에 집중하고, 지나간 기록과 다가올 내일을 아주 게으르고 즉흥 성향이 강한 사람도 최소한의 노력으로 관리할 수 있도록 돕는 미니멀리즘 투두(To-Do) 애플리케이션입니다.
 
 "오늘 할 일", "내일 할 일", "지난 이력"의 세 가지 직관적인 뷰(View)를 제공하여 미완료된 업무를 효과적으로 추적하고 복원할 수 있습니다.
 
 ![Project Status](https://img.shields.io/badge/version-1.1.0-blue.svg) ![SvelteKit](https://img.shields.io/badge/SvelteKit-FF3E00?style=flat&logo=svelte&logoColor=white) ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat&logo=supabase&logoColor=white) ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat&logo=tailwind-css&logoColor=white)
 
 ---
+
+## 🔗 Live 서비스 주소
+
+: https://todomorrow.vercel.app
+
+## 🖥️ 프리뷰 (Preview)
+
+### Desktop 
+
+<img width="1626" height="1024" alt="Result_데스크탑 화면" src="https://github.com/user-attachments/assets/8f796cd1-08e2-45fa-af5f-a7191743b0cd" />
+
+### Mobile 
+
+<img width="614" height="878" alt="Result_모바일 화면" src="https://github.com/user-attachments/assets/c6ba5646-0d27-4f45-aac2-395cde5883bb" />
+
+
 
 ## ✨ 핵심 기능 (Features)
 
@@ -85,3 +101,5 @@ pnpm dev
   - GitHub 푸시 트리거 기반의 Vercel 정식 배포 파이프라인 구성.
 - [ ] **Push Notifications (푸시 알림)**
   - 기한 초과(지난 이력) 투두가 발생했을 때 모바일/웹 환경으로 리마인드 푸시 제공.
+- [ ] **유료 도메인 구매**
+  - `*.vercel.app` 도메인이 아닌 정식 도메인으로 변경.
