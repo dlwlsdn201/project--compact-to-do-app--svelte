@@ -42,7 +42,7 @@
 	>
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<div
-			class="bg-card text-card-foreground border rounded-2xl w-full max-w-md shadow-lg flex flex-col min-h-0 max-h-[min(85vh,32rem)] overflow-hidden pt-2"
+			class="bg-card text-card-foreground border rounded-2xl w-full max-w-lg shadow-lg flex flex-col min-h-0 max-h-[min(85vh,32rem)] overflow-hidden pt-2"
 			onclick={(e) => e.stopPropagation()}
 			in:slide={{ duration: 250, axis: 'y' }}
 			out:slide={{ duration: 200, axis: 'y' }}
@@ -60,14 +60,14 @@
 			aria-labelledby={titleId}
 			tabindex="-1"
 		>
-			<div class="flex shrink-0 items-center justify-between px-4 pb-2 border-b">
-			<div class="flex items-center gap-1">
-				<h2 id={titleId} class="text-lg font-semibold tracking-tight pr-2">
-					[{note.updatedAt}]
-				</h2>
-				<h3 class="text-muted-foreground">
+			<div class="flex shrink-0 items-center justify-between px-4 pr-1 pb-2 border-b">
+			<div class="flex items-center gap-0.5 break-keep">
+				<span id={titleId} class="text-lg mobile:text-xs font-semibold tracking-tight pr-2">
+					{note.updatedAt}
+				</span>
+				<span class="text-muted-foreground mobile:text-sm">
 					v{note.version} {note.title} 
-				</h3>
+				</span>
 
 			</div>
 				<button
@@ -91,13 +91,23 @@
 						신규 기능
 					</h3>
 					{#if note.features.length > 0}
-						<ul
-							class="list-disc list-inside space-y-2 text-sm text-muted-foreground leading-relaxed"
-						>
+						<ol class="list-decimal list-inside space-y-2 text-sm text-muted-foreground leading-relaxed">
 							{#each note.features as item}
-								<li>{item}</li>
+								<li>
+									<span>{item.summary}</span>
+									{#if item.detail && item.detail.length > 0}
+										<ul class="ml-4 mt-1 space-y-0.5">
+											{#each item.detail as sub}
+												<li class="flex items-start gap-1.5 text-muted-foreground/80">
+													<span class="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-muted-foreground/40"></span>
+													<span>{sub}</span>
+												</li>
+											{/each}
+										</ul>
+									{/if}
+								</li>
 							{/each}
-						</ul>
+						</ol>
 					{:else}
 						<p class="text-sm text-muted-foreground">이번 릴리즈에 신규 기능 내역은 없어요.</p>
 					{/if}
