@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+@custom-variant mobile (@media (max-width: 769px));
+@custom-variant tablet (@media (max-width: 1025px));
+
 @theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
