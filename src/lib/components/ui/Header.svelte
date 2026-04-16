@@ -79,6 +79,8 @@
 						로그아웃
 					</button>
 				</div>
+			{:else if authStore.isGuest}
+				<span class="text-sm font-medium">게스트 님</span>
 			{/if}
 
 			<button
