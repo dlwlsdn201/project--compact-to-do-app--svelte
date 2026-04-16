@@ -4,7 +4,7 @@
 
 "오늘 할 일", "내일 할 일", "지난 이력"의 세 가지 직관적인 뷰(View)를 제공하여 미완료된 업무를 효과적으로 추적하고 복원할 수 있습니다.
 
-![Project Status](https://img.shields.io/badge/version-1.1.0-blue.svg) ![SvelteKit](https://img.shields.io/badge/SvelteKit-FF3E00?style=flat&logo=svelte&logoColor=white) ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat&logo=supabase&logoColor=white) ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat&logo=tailwind-css&logoColor=white)
+![Project Status](https://img.shields.io/badge/version-1.2.0-blue.svg) ![SvelteKit](https://img.shields.io/badge/SvelteKit-FF3E00?style=flat&logo=svelte&logoColor=white) ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat&logo=supabase&logoColor=white) ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat&logo=tailwind-css&logoColor=white)
 
 ---
 
@@ -28,6 +28,7 @@
 ## ✨ 핵심 기능 (Features)
 
 - **소셜 로그인 (Kakao OAuth)**: Supabase Auth를 이용한 원클릭 카카오 로그인 환경 구축
+- **게스트 모드 (비로그인 사용)**: 카카오 로그인 없이도 앱을 즉시 사용 가능. 데이터는 브라우저 localStorage에 저장되며 네트워크 연결 없이 동작
 - **날짜 기반 인텔리전트 필터링**:
   - `오늘`: 오늘 기한인 미완료/완료 투두 목록 관리
   - `내일`: 내일을 위해 미리 계획하고 바로 내일 날짜로 데이터 생성
