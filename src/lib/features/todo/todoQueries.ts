@@ -1,6 +1,12 @@
 import { createQuery, createMutation, useQueryClient } from '@tanstack/svelte-query';
 import { todoApi } from '$lib/api/todoApi';
+import { localTodoApi } from '$lib/api/localTodoApi';
+import { authStore } from '$lib/features/auth/authStore.svelte';
 import type { Todo, CreateTodoDTO, UpdateTodoDTO } from '$lib/types/todo';
+
+function getApi() {
+	return authStore.isGuest ? localTodoApi : todoApi;
+}
 
 export const QUERY_KEYS = {
 	todos: ['todos'] as const
@@ -9,7 +15,7 @@ export const QUERY_KEYS = {
 export function useTodos() {
 	return createQuery(() => ({
 		queryKey: QUERY_KEYS.todos,
-		queryFn: todoApi.getTodos
+		queryFn: () => getApi().getTodos()
 	}));
 }
 
@@ -17,7 +23,7 @@ export function useCreateTodo() {
 	const queryClient = useQueryClient();
 
 	return createMutation(() => ({
-		mutationFn: todoApi.createTodo,
+		mutationFn: (dto: CreateTodoDTO) => getApi().createTodo(dto),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: QUERY_KEYS.todos });
 		}
@@ -29,7 +35,7 @@ export function useUpdateTodo() {
 
 	return createMutation(() => ({
 		mutationFn: ({ id, updates }: { id: string; updates: UpdateTodoDTO }) =>
-			todoApi.updateTodo(id, updates),
+			getApi().updateTodo(id, updates),
 		// Optimistic Update
 		onMutate: async ({ id, updates }: { id: string; updates: UpdateTodoDTO }) => {
 			await queryClient.cancelQueries({ queryKey: QUERY_KEYS.todos });
@@ -57,7 +63,7 @@ export function useDeleteTodo() {
 	const queryClient = useQueryClient();
 
 	return createMutation(() => ({
-		mutationFn: (id: string) => todoApi.deleteTodo(id),
+		mutationFn: (id: string) => getApi().deleteTodo(id),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: QUERY_KEYS.todos });
 		}

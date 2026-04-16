@@ -55,7 +55,7 @@
 				{/each}
 			</div>
 		</div>
-	{:else if !authStore.user}
+	{:else if !authStore.user && !authStore.isGuest}
 		<!-- 오직 카카오 로그인 화면만 있는 페이지 노출 -->
 		<Intro />
 	{:else}
