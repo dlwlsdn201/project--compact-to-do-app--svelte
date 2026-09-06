@@ -100,7 +100,7 @@
 	>
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<div
-			class="bg-card text-card-foreground border rounded-2xl w-full max-w-md shadow-lg flex flex-col pt-2"
+			class="bg-card text-card-foreground border rounded-2xl w-full max-w-md shadow-lg flex flex-col pt-2 min-h-[467px]"
 			onclick={(e) => e.stopPropagation()}
 			in:slide={{ duration: 250, axis: 'y' }}
 			out:slide={{ duration: 200, axis: 'y' }}
@@ -112,7 +112,7 @@
 				</button>
 			</div>
 
-			<form class="p-4 flex flex-col gap-4" onsubmit={handleSubmit}>
+			<form class="p-4 flex flex-1 flex-col gap-4" onsubmit={handleSubmit}>
 				<div class="flex flex-col gap-1.5">
 					<label for="title" class="text-sm font-medium">
 						<span class="text-xs text-red-500">*</span>
@@ -143,12 +143,12 @@
 					</div>
 				</div>
 
-				<div class="flex flex-col gap-1.5">
+				<div class="flex flex-1 flex-col gap-1.5">
 					<label for="content" class="text-sm font-medium">상세 내용</label>
 					<textarea
 						id="content"
 						bind:value={content}
-						class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+						class="flex min-h-[80px] w-full flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 						placeholder="자세한 내용을 기록하세요"
 					></textarea>
 				</div>
