@@ -11,6 +11,7 @@ let MOCK_TODOS: Todo[] = [
 		priority: 'high',
 		is_completed: false,
 		due_date: new Date().toISOString(),
+		due_time: null,
 		created_at: new Date().toISOString()
 	},
 	{
@@ -21,6 +22,7 @@ let MOCK_TODOS: Todo[] = [
 		priority: 'medium',
 		is_completed: true,
 		due_date: new Date().toISOString(),
+		due_time: '18:00',
 		created_at: new Date(Date.now() - 86400000).toISOString()
 	}
 ];
@@ -55,6 +57,7 @@ export const todoApi = {
 				id: crypto.randomUUID(), 
 				user_id: 'mock', 
 				content: todo.content || null,
+				due_time: todo.due_time ?? null,
 				created_at: new Date().toISOString() 
 			};
 			MOCK_TODOS = [newTodo, ...MOCK_TODOS];

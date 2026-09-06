@@ -21,7 +21,8 @@ describe('localTodoApi', () => {
 				content: null,
 				priority: 'medium',
 				is_completed: false,
-				due_date: null
+				due_date: null,
+				due_time: null
 			});
 
 			const todos = await localTodoApi.getTodos();
@@ -37,7 +38,8 @@ describe('localTodoApi', () => {
 				content: '내용',
 				priority: 'high' as const,
 				is_completed: false,
-				due_date: '2026-04-20'
+				due_date: '2026-04-20',
+				due_time: null
 			};
 
 			const created = await localTodoApi.createTodo(dto);
@@ -58,14 +60,16 @@ describe('localTodoApi', () => {
 				content: null,
 				priority: 'low',
 				is_completed: false,
-				due_date: null
+				due_date: null,
+				due_time: null
 			});
 			await localTodoApi.createTodo({
 				title: '할 일 B',
 				content: null,
 				priority: 'medium',
 				is_completed: true,
-				due_date: null
+				due_date: null,
+				due_time: null
 			});
 
 			const todos = await localTodoApi.getTodos();
@@ -78,14 +82,16 @@ describe('localTodoApi', () => {
 				content: null,
 				priority: 'low',
 				is_completed: false,
-				due_date: null
+				due_date: null,
+				due_time: null
 			});
 			await localTodoApi.createTodo({
 				title: '나중에 생성',
 				content: null,
 				priority: 'low',
 				is_completed: false,
-				due_date: null
+				due_date: null,
+				due_time: null
 			});
 
 			const todos = await localTodoApi.getTodos();
@@ -100,7 +106,8 @@ describe('localTodoApi', () => {
 				content: null,
 				priority: 'low',
 				is_completed: false,
-				due_date: null
+				due_date: null,
+				due_time: null
 			});
 
 			const updated = await localTodoApi.updateTodo(created.id, {
@@ -119,7 +126,8 @@ describe('localTodoApi', () => {
 				content: null,
 				priority: 'medium',
 				is_completed: false,
-				due_date: null
+				due_date: null,
+				due_time: null
 			});
 
 			await localTodoApi.updateTodo(created.id, { is_completed: true });
@@ -136,7 +144,8 @@ describe('localTodoApi', () => {
 				content: null,
 				priority: 'low',
 				is_completed: false,
-				due_date: null
+				due_date: null,
+				due_time: null
 			});
 
 			await localTodoApi.deleteTodo(todo.id);
@@ -151,14 +160,16 @@ describe('localTodoApi', () => {
 				content: null,
 				priority: 'low',
 				is_completed: false,
-				due_date: null
+				due_date: null,
+				due_time: null
 			});
 			await localTodoApi.createTodo({
 				title: '유지되어야 함',
 				content: null,
 				priority: 'medium',
 				is_completed: false,
-				due_date: null
+				due_date: null,
+				due_time: null
 			});
 
 			await localTodoApi.deleteTodo(todoA.id);

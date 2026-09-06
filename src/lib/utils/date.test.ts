@@ -1,5 +1,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { getStartOfDay, isToday, isTomorrow, isPast, getTomorrowDateString } from './date';
+import {
+	getStartOfDay,
+	isToday,
+	isTomorrow,
+	isPast,
+	getTomorrowDateString,
+	normalizeDueTime,
+	formatDueTime,
+	getDueDateTime,
+	isOverdue
+} from './date';
 
 // ─────────────────────────────────────────────
 // getStartOfDay
@@ -171,5 +181,82 @@ describe('getTomorrowDateString', () => {
 		expect(parsed.getFullYear()).toBe(2027);
 		expect(parsed.getMonth()).toBe(0); // January = 0
 		expect(parsed.getDate()).toBe(1);
+	});
+});
+
+describe('normalizeDueTime', () => {
+	it('빈 값·null·undefined는 null을 반환한다', () => {
+		expect(normalizeDueTime('')).toBeNull();
+		expect(normalizeDueTime(null)).toBeNull();
+		expect(normalizeDueTime(undefined)).toBeNull();
+	});
+
+	it("'HH:mm' 입력을 그대로 정규화한다", () => {
+		expect(normalizeDueTime('18:30')).toBe('18:30');
+	});
+
+	it('한 자리 시간은 0으로 채운다', () => {
+		expect(normalizeDueTime('9:05')).toBe('09:05');
+	});
+
+	it("Supabase time 컬럼의 'HH:MM:SS' 형식에서 초를 잘라낸다", () => {
+		expect(normalizeDueTime('18:30:00')).toBe('18:30');
+	});
+
+	it('형식이 어긋나거나 범위를 넘으면 null을 반환한다', () => {
+		expect(normalizeDueTime('오후 6시')).toBeNull();
+		expect(normalizeDueTime('24:00')).toBeNull();
+		expect(normalizeDueTime('12:60')).toBeNull();
+	});
+});
+
+describe('formatDueTime', () => {
+	it('오전 시각을 한국어로 표기한다', () => {
+		expect(formatDueTime('09:05')).toBe('오전 9:05');
+	});
+
+	it('오후 시각을 12시간제로 표기한다', () => {
+		expect(formatDueTime('18:30')).toBe('오후 6:30');
+	});
+
+	it('자정과 정오를 12시로 표기한다', () => {
+		expect(formatDueTime('00:00')).toBe('오전 12:00');
+		expect(formatDueTime('12:00')).toBe('오후 12:00');
+	});
+
+	it('시각 미지정이면 빈 문자열을 반환한다', () => {
+		expect(formatDueTime(null)).toBe('');
+	});
+});
+
+describe('getDueDateTime', () => {
+	it('날짜와 시각을 합쳐 Date를 만든다', () => {
+		const result = getDueDateTime('2026-04-14T00:00:00.000Z', '18:30');
+		expect(result?.getHours()).toBe(18);
+		expect(result?.getMinutes()).toBe(30);
+	});
+
+	it('시각이 미지정이면 null을 반환한다', () => {
+		expect(getDueDateTime('2026-04-14T00:00:00.000Z', null)).toBeNull();
+	});
+
+	it('날짜가 미지정이면 null을 반환한다', () => {
+		expect(getDueDateTime(null, '18:30')).toBeNull();
+	});
+});
+
+describe('isOverdue', () => {
+	const baseDate = new Date(2026, 3, 14, 12, 0, 0);
+
+	it('마감 시각이 지났으면 true', () => {
+		expect(isOverdue(baseDate.toISOString(), '09:00', baseDate)).toBe(true);
+	});
+
+	it('마감 시각이 아직 남았으면 false', () => {
+		expect(isOverdue(baseDate.toISOString(), '18:00', baseDate)).toBe(false);
+	});
+
+	it('시각이 미지정이면 항상 false (날짜 단위 관리 항목)', () => {
+		expect(isOverdue(baseDate.toISOString(), null, baseDate)).toBe(false);
 	});
 });

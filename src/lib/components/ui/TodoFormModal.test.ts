@@ -28,6 +28,7 @@ const editingTodo: Todo = {
 	priority: 'medium',
 	is_completed: false,
 	due_date: '2026-04-14',
+	due_time: null,
 	created_at: '2026-04-14T09:00:00.000Z'
 };
 
@@ -114,6 +115,68 @@ describe('TodoFormModal', () => {
 			await fireEvent.click(overlay);
 			await tick();
 			expect(screen.queryByRole('heading', { name: '새 할 일 추가' })).not.toBeInTheDocument();
+		});
+	});
+
+	// ──────────────────────────────────────────
+	// 마감 시각
+	// ──────────────────────────────────────────
+	describe('마감 시각', () => {
+		it('마감 시각 입력 필드가 렌더링된다', () => {
+			const { container } = render(TodoFormModal, { props: { isOpen: true } });
+			expect(container.querySelector('#due-time')).not.toBeNull();
+		});
+
+		it('마감 시각을 입력하고 제출하면 due_time이 함께 전달된다', async () => {
+			const { container } = render(TodoFormModal, {
+				props: { isOpen: true, defaultDate: '2026-04-14T00:00:00.000Z' }
+			});
+			await fireEvent.input(screen.getByLabelText('* 제목'), {
+				target: { value: '마감 있는 할 일' }
+			});
+			await fireEvent.input(container.querySelector('#due-time')!, {
+				target: { value: '18:30' }
+			});
+			await fireEvent.submit(document.querySelector('form')!);
+
+			expect(mockCreateMutate).toHaveBeenCalledWith(
+				expect.objectContaining({ due_time: '18:30' }),
+				expect.any(Object)
+			);
+		});
+
+		it('마감 시각을 비우고 제출하면 due_time은 null로 전달된다', async () => {
+			render(TodoFormModal, { props: { isOpen: true, defaultDate: '2026-04-14T00:00:00.000Z' } });
+			await fireEvent.input(screen.getByLabelText('* 제목'), {
+				target: { value: '마감 없는 할 일' }
+			});
+			await fireEvent.submit(document.querySelector('form')!);
+
+			expect(mockCreateMutate).toHaveBeenCalledWith(
+				expect.objectContaining({ due_time: null }),
+				expect.any(Object)
+			);
+		});
+
+		it('수정 모드에서 기존 마감 시각이 입력창에 채워진다', async () => {
+			const { container } = render(TodoFormModal, {
+				props: { isOpen: true, editingTodo: { ...editingTodo, due_time: '18:30:00' } }
+			});
+			await tick();
+			expect((container.querySelector('#due-time') as HTMLInputElement).value).toBe('18:30');
+		});
+
+		it('수정 모드에서 제출하면 due_time이 updates에 포함된다', async () => {
+			render(TodoFormModal, {
+				props: { isOpen: true, editingTodo: { ...editingTodo, due_time: '18:30:00' } }
+			});
+			await tick();
+			await fireEvent.submit(document.querySelector('form')!);
+
+			expect(mockUpdateMutate).toHaveBeenCalledWith(
+				expect.objectContaining({ updates: expect.objectContaining({ due_time: '18:30' }) }),
+				expect.any(Object)
+			);
 		});
 	});
 

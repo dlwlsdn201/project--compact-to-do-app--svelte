@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { Todo, Priority } from '$lib/types/todo';
 	import { useUpdateTodo, useDeleteTodo } from '$lib/features/todo/todoQueries';
-	import { Trash2, Pencil } from 'lucide-svelte';
+	import { Trash2, Pencil, Clock } from 'lucide-svelte';
+	import { formatDueTime, isOverdue } from '$lib/utils/date';
 
 	let { todo, showDate = false, isHistoryArea = false, onEdit } = $props<{ todo: Todo; showDate?: boolean; isHistoryArea?: boolean; onEdit?: (todo: Todo) => void }>();
 
@@ -36,6 +37,10 @@
 			updates: { due_date: tomorrow.toISOString() }
 		} as any);
 	}
+
+	let dueTimeLabel = $derived(formatDueTime(todo.due_time));
+	/** 마감 시각이 지났고 아직 완료되지 않은 항목만 경고로 강조한다. */
+	let isDueTimePassed = $derived(!todo.is_completed && isOverdue(todo.due_date, todo.due_time));
 
 	const priorityColors: Record<Priority, string> = {
 		low: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
@@ -93,6 +98,19 @@
 				<div class="text-[10px] text-muted-foreground font-medium">
 					{new Date(todo.created_at).toLocaleDateString('ko-KR')}
 				</div>
+			{/if}
+			{#if dueTimeLabel}
+				<span
+					data-testid="due-time-badge"
+					class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-[4px]
+					{isDueTimePassed
+						? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+						: 'bg-muted text-muted-foreground'}
+					{todo.is_completed ? 'opacity-60' : ''}"
+				>
+					<Clock class="w-3 h-3" />
+					{dueTimeLabel}{isDueTimePassed ? ' 마감' : ''}
+				</span>
 			{/if}
 			<span class="text-[10px] font-bold px-2 py-0.5 rounded-[4px] {priorityColors[todo.priority as Priority]}">
 				{todo.priority === 'high' ? '우선순위 높음' : todo.priority === 'medium' ? '우선순위 보통' : '우선순위 낮음'}

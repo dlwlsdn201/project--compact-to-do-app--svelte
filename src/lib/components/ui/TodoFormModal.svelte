@@ -2,6 +2,7 @@
 	import { slide } from 'svelte/transition';
 	import type { Priority, Todo } from '$lib/types/todo';
 	import { useCreateTodo, useUpdateTodo } from '$lib/features/todo/todoQueries';
+	import { normalizeDueTime } from '$lib/utils/date';
 	import { X } from 'lucide-svelte';
 	// Simple Zod integration
 	import { z } from 'zod';
@@ -18,6 +19,7 @@
 	let title = $state('');
 	let content = $state('');
 	let priority = $state<Priority>('low');
+	let dueTime = $state('');
 	let error = $state<string | null>(null);
 
 	$effect(() => {
@@ -26,10 +28,12 @@
 				title = editingTodo.title;
 				content = editingTodo.content || '';
 				priority = editingTodo.priority as Priority;
+				dueTime = normalizeDueTime(editingTodo.due_time) ?? '';
 			} else {
 				title = '';
 				content = '';
 				priority = 'low';
+				dueTime = '';
 			}
 			error = null;
 		}
@@ -59,7 +63,8 @@
 					updates: {
 						title: result.data.title,
 						content: result.data.content || null,
-						priority: result.data.priority
+						priority: result.data.priority,
+						due_time: normalizeDueTime(dueTime)
 					}
 				},
 				{
@@ -75,7 +80,8 @@
 					content: result.data.content || null,
 					priority: result.data.priority,
 					is_completed: false,
-					due_date: defaultDate
+					due_date: defaultDate,
+					due_time: normalizeDueTime(dueTime)
 				},
 				{
 					onSuccess: () => {
@@ -151,6 +157,29 @@
 						class="flex min-h-[80px] w-full flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 						placeholder="자세한 내용을 기록하세요"
 					></textarea>
+				</div>
+
+				<div class="flex flex-col gap-1.5">
+					<label for="due-time" class="text-sm font-medium">
+						마감 시각 <span class="text-xs font-normal text-muted-foreground">(선택)</span>
+					</label>
+					<div class="flex items-center gap-2">
+						<input
+							id="due-time"
+							type="time"
+							bind:value={dueTime}
+							class="flex h-10 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+						/>
+						{#if dueTime}
+							<button
+								type="button"
+								class="h-10 shrink-0 rounded-md border border-input px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted"
+								onclick={() => (dueTime = '')}
+							>
+								지우기
+							</button>
+						{/if}
+					</div>
 				</div>
 
 				<div class="flex flex-col gap-1.5">
