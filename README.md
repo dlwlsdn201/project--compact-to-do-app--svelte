@@ -4,7 +4,7 @@
 
 "오늘 할 일", "내일 할 일", "지난 이력"의 세 가지 직관적인 뷰(View)를 제공하여 미완료된 업무를 효과적으로 추적하고 복원할 수 있습니다.
 
-![Project Status](https://img.shields.io/badge/version-1.2.0-blue.svg) ![SvelteKit](https://img.shields.io/badge/SvelteKit-FF3E00?style=flat&logo=svelte&logoColor=white) ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat&logo=supabase&logoColor=white) ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat&logo=tailwind-css&logoColor=white)
+![Project Status](https://img.shields.io/badge/version-1.3.0-blue.svg) ![SvelteKit](https://img.shields.io/badge/SvelteKit-FF3E00?style=flat&logo=svelte&logoColor=white) ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat&logo=supabase&logoColor=white) ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat&logo=tailwind-css&logoColor=white)
 
 ---
 
@@ -35,6 +35,8 @@
   - `지난 이력`: 기한이 지났지만 미완료된 항목들을 시각적으로 강조(**빨간불 경고**)하고 과거의 완료된 기록들을 조회
 - **부활(Restore) 액션**: 지난 이력에 남아 방치된 할 일을 '오늘 하기' 또는 '내일 하기' 버튼 클릭 한 번으로 새 탭으로 끌어오기
 - **우선순위 정렬**: 낮음/보통/높음 등의 우선순위 데이터를 기반으로 실시간 정렬(내림차순/오름차순) 적용
+- **마감 시각 관리**: 날짜에 더해 하루 중 마감 시각까지 기록하고, 시각이 지난 미완료 항목은 목록에서 경고 색상으로 강조
+- **할 일 프리셋(템플릿)**: 자주 쓰는 제목·내용·우선순위 형식을 프리셋으로 저장해두고, 신규 등록 시 한 번의 선택으로 폼을 채운 뒤 세부 내용만 고쳐 빠르게 등록
 - **다크/라이트 모드 지원**: 사용자 인터페이스 최적화를 위한 시스템 테마 지원
 
 ---
