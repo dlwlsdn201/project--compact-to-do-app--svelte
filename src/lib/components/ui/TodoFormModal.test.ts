@@ -118,6 +118,25 @@ describe('TodoFormModal', () => {
 	});
 
 	// ──────────────────────────────────────────
+	// Layout
+	// ──────────────────────────────────────────
+	describe('레이아웃', () => {
+		it('모달 패널에 기본 최소 높이(467px)가 지정되어 있다', () => {
+			const { container } = render(TodoFormModal, { props: { isOpen: true } });
+			const panel = container.querySelector('div.fixed > div') as HTMLDivElement;
+			expect(panel).not.toBeNull();
+			// 기존 실측 기본 높이 427px + 40px
+			expect(panel.className).toContain('min-h-[467px]');
+		});
+
+		it('늘어난 높이를 상세 내용 textarea가 흡수하도록 flex-1이 적용되어 있다', () => {
+			const { container } = render(TodoFormModal, { props: { isOpen: true } });
+			const textarea = container.querySelector('#content') as HTMLTextAreaElement;
+			expect(textarea.className).toContain('flex-1');
+		});
+	});
+
+	// ──────────────────────────────────────────
 	// Edge Case (Validation)
 	// ──────────────────────────────────────────
 	describe('유효성 검사', () => {
