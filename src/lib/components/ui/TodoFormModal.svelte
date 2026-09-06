@@ -3,6 +3,8 @@
 	import type { Priority, Todo } from '$lib/types/todo';
 	import { useCreateTodo, useUpdateTodo } from '$lib/features/todo/todoQueries';
 	import { normalizeDueTime } from '$lib/utils/date';
+	import TodoPresetSelector from './TodoPresetSelector.svelte';
+	import type { TodoPreset } from '$lib/types/preset';
 	import { X } from 'lucide-svelte';
 	// Simple Zod integration
 	import { z } from 'zod';
@@ -44,6 +46,14 @@
 		content: z.string().optional(),
 		priority: z.enum(['low', 'medium', 'high'])
 	});
+
+	/** 프리셋 선택 시 폼을 템플릿 값으로 채운다. 이후 세부 내용은 사용자가 수정한다. */
+	function applyPreset(preset: TodoPreset) {
+		title = preset.title;
+		content = preset.content ?? '';
+		priority = preset.priority;
+		error = null;
+	}
 
 	function handleSubmit(e: SubmitEvent) {
 		e.preventDefault();
@@ -119,6 +129,11 @@
 			</div>
 
 			<form class="p-4 flex flex-1 flex-col gap-4" onsubmit={handleSubmit}>
+				{#if !editingTodo}
+					<TodoPresetSelector {title} {content} {priority} onApply={applyPreset} />
+					<div class="border-t"></div>
+				{/if}
+
 				<div class="flex flex-col gap-1.5">
 					<label for="title" class="text-sm font-medium">
 						<span class="text-xs text-red-500">*</span>
