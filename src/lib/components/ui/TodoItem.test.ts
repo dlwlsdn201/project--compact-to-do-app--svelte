@@ -28,8 +28,13 @@ const baseTodo: Todo = {
 	priority: 'high',
 	is_completed: false,
 	due_date: '2026-04-14',
+	due_time: null,
 	created_at: '2026-04-14T09:00:00.000Z'
 };
+
+/** 마감 시각 판정은 현재 시각에 의존하므로 과거/미래 날짜를 명시적으로 만든다. */
+const pastDate = new Date(Date.now() - 7 * 86400000).toISOString();
+const futureDate = new Date(Date.now() + 7 * 86400000).toISOString();
 
 describe('TodoItem', () => {
 	beforeEach(() => {
@@ -131,6 +136,43 @@ describe('TodoItem', () => {
 	// ──────────────────────────────────────────
 	// Edge Case
 	// ──────────────────────────────────────────
+	// ──────────────────────────────────────────
+	// 마감 시각
+	// ──────────────────────────────────────────
+	describe('마감 시각', () => {
+		it('due_time이 없으면 마감 시각 배지를 표시하지 않는다', () => {
+			const { queryByTestId } = render(TodoItem, { props: { todo: baseTodo } });
+			expect(queryByTestId('due-time-badge')).toBeNull();
+		});
+
+		it('due_time이 있으면 한국어 표기로 배지를 표시한다', () => {
+			const { getByTestId } = render(TodoItem, {
+				props: { todo: { ...baseTodo, due_date: futureDate, due_time: '18:30' } }
+			});
+			expect(getByTestId('due-time-badge').textContent).toContain('오후 6:30');
+		});
+
+		it('마감 시각이 지난 미완료 항목은 경고 색상과 "마감" 표기로 강조한다', () => {
+			const { getByTestId } = render(TodoItem, {
+				props: { todo: { ...baseTodo, due_date: pastDate, due_time: '09:00' } }
+			});
+			const badge = getByTestId('due-time-badge');
+			expect(badge.textContent).toContain('마감');
+			expect(badge.className).toContain('text-red-800');
+		});
+
+		it('마감 시각이 지났어도 완료된 항목은 강조하지 않는다', () => {
+			const { getByTestId } = render(TodoItem, {
+				props: {
+					todo: { ...baseTodo, due_date: pastDate, due_time: '09:00', is_completed: true }
+				}
+			});
+			const badge = getByTestId('due-time-badge');
+			expect(badge.textContent).not.toContain('마감');
+			expect(badge.className).not.toContain('text-red-800');
+		});
+	});
+
 	describe('Edge Case', () => {
 		it('isHistoryArea=true + 미완료 → "오늘 하기", "내일 하기" 버튼이 표시된다', () => {
 			const { getByText } = render(TodoItem, { props: { todo: baseTodo, isHistoryArea: true } });

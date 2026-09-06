@@ -27,6 +27,7 @@ export const localTodoApi = {
 			id: crypto.randomUUID(),
 			user_id: 'guest',
 			content: todo.content ?? null,
+			due_time: todo.due_time ?? null,
 			created_at: new Date().toISOString()
 		};
 		saveTodos([newTodo, ...todos]);

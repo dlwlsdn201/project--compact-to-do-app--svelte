@@ -14,6 +14,7 @@ function makeTodo(priority: Todo['priority'], id = priority): Todo {
 		priority,
 		is_completed: false,
 		due_date: '2026-04-14',
+		due_time: null,
 		created_at: new Date().toISOString()
 	};
 }

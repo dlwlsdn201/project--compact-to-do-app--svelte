@@ -8,6 +8,8 @@ export interface Todo {
 	priority: Priority;
 	is_completed: boolean;
 	due_date: string | null;
+	/** 마감 시각 'HH:mm' (선택). null이면 시각 미지정. */
+	due_time: string | null;
 	created_at: string;
 }
 
