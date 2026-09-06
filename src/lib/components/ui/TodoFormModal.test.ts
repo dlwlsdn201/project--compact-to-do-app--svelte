@@ -18,6 +18,25 @@ vi.mock('$lib/features/todo/todoQueries', () => ({
 }));
 
 // ─────────────────────────────────────────────
+// Mock: 프리셋 쿼리 훅
+// Supabase env 및 QueryClient 의존성을 제거한다.
+// ─────────────────────────────────────────────
+const mockCreatePresetMutate = vi.fn();
+const mockDeletePresetMutate = vi.fn();
+let mockPresets: unknown[] = [];
+
+vi.mock('$lib/features/todo/presetQueries', () => ({
+	usePresets: () => ({
+		get data() {
+			return mockPresets;
+		},
+		isLoading: false
+	}),
+	useCreatePreset: () => ({ mutate: mockCreatePresetMutate, isPending: false }),
+	useDeletePreset: () => ({ mutate: mockDeletePresetMutate, isPending: false })
+}));
+
+// ─────────────────────────────────────────────
 // 공통 테스트 픽스처
 // ─────────────────────────────────────────────
 const editingTodo: Todo = {
@@ -36,6 +55,9 @@ describe('TodoFormModal', () => {
 	beforeEach(() => {
 		mockCreateMutate.mockClear();
 		mockUpdateMutate.mockClear();
+		mockCreatePresetMutate.mockClear();
+		mockDeletePresetMutate.mockClear();
+		mockPresets = [];
 	});
 
 	// ──────────────────────────────────────────
@@ -115,6 +137,69 @@ describe('TodoFormModal', () => {
 			await fireEvent.click(overlay);
 			await tick();
 			expect(screen.queryByRole('heading', { name: '새 할 일 추가' })).not.toBeInTheDocument();
+		});
+	});
+
+	// ──────────────────────────────────────────
+	// 프리셋
+	// ──────────────────────────────────────────
+	describe('프리셋', () => {
+		const weeklyReport = {
+			id: 'preset-1',
+			user_id: 'guest',
+			name: '주간 보고',
+			title: '주간 업무 보고 작성',
+			content: '지난주 성과 / 이번주 계획',
+			priority: 'high' as const,
+			created_at: '2026-09-06T00:00:00.000Z'
+		};
+
+		it('생성 모드에서는 프리셋 영역이 표시된다', () => {
+			const { getByTestId } = render(TodoFormModal, { props: { isOpen: true } });
+			expect(getByTestId('preset-selector')).toBeInTheDocument();
+		});
+
+		it('수정 모드에서는 프리셋 영역이 표시되지 않는다', () => {
+			const { queryByTestId } = render(TodoFormModal, { props: { isOpen: true, editingTodo } });
+			expect(queryByTestId('preset-selector')).toBeNull();
+		});
+
+		it('프리셋을 선택하면 제목·내용이 채워진다', async () => {
+			mockPresets = [weeklyReport];
+			const { getByTestId, container } = render(TodoFormModal, { props: { isOpen: true } });
+
+			await fireEvent.click(getByTestId('preset-chip'));
+			await tick();
+
+			expect((screen.getByLabelText('* 제목') as HTMLInputElement).value).toBe(
+				'주간 업무 보고 작성'
+			);
+			expect((container.querySelector('#content') as HTMLTextAreaElement).value).toBe(
+				'지난주 성과 / 이번주 계획'
+			);
+		});
+
+		it('프리셋으로 채운 뒤 세부 내용을 수정해 제출할 수 있다', async () => {
+			mockPresets = [weeklyReport];
+			const { getByTestId } = render(TodoFormModal, {
+				props: { isOpen: true, defaultDate: '2026-09-06T00:00:00.000Z' }
+			});
+
+			await fireEvent.click(getByTestId('preset-chip'));
+			await tick();
+			await fireEvent.input(screen.getByLabelText('* 제목'), {
+				target: { value: '주간 업무 보고 작성 (9월 1주차)' }
+			});
+			await fireEvent.submit(document.querySelector('form')!);
+
+			expect(mockCreateMutate).toHaveBeenCalledWith(
+				expect.objectContaining({
+					title: '주간 업무 보고 작성 (9월 1주차)',
+					content: '지난주 성과 / 이번주 계획',
+					priority: 'high'
+				}),
+				expect.any(Object)
+			);
 		});
 	});
 
