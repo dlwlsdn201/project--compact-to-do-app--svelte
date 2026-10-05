@@ -269,6 +269,49 @@ describe('TodoFormModal', () => {
 	// Layout
 	// ──────────────────────────────────────────
 	describe('레이아웃', () => {
+		it('상세 내용 입력창은 기본 160px 이상이며 세로 크기를 조절할 수 있다', () => {
+			const { container } = render(TodoFormModal, { props: { isOpen: true } });
+			const textarea = container.querySelector('#content') as HTMLTextAreaElement;
+			expect(textarea.style.minHeight).toBe('160px');
+			expect(textarea.className).toContain('resize-y');
+		});
+
+		it('Markdown 미리보기를 표시하고 원문을 유지한 채 다시 편집할 수 있다', async () => {
+			render(TodoFormModal, { props: { isOpen: true } });
+			await fireEvent.input(screen.getByLabelText('상세 내용'), {
+				target: { value: '## 제목\n\n- 항목\n\n**강조**' }
+			});
+			await fireEvent.click(screen.getByRole('button', { name: '미리보기' }));
+			const preview = screen.getByTestId('markdown-preview');
+			expect(preview.querySelector('h2')?.textContent).toBe('제목');
+			expect(preview.querySelector('li')?.textContent).toBe('항목');
+			expect(preview.querySelector('strong')?.textContent).toBe('강조');
+			await fireEvent.click(screen.getByRole('button', { name: '작성' }));
+			expect((screen.getByLabelText('상세 내용') as HTMLTextAreaElement).value).toBe('## 제목\n\n- 항목\n\n**강조**');
+		});
+
+		it('미리보기 상태에서 저장해도 Markdown 원문을 전달한다', async () => {
+			render(TodoFormModal, { props: { isOpen: true } });
+			await fireEvent.input(screen.getByLabelText('* 제목'), { target: { value: '마크다운 할 일' } });
+			await fireEvent.input(screen.getByLabelText('상세 내용'), { target: { value: '**중요** 항목' } });
+			await fireEvent.click(screen.getByRole('button', { name: '미리보기' }));
+			await fireEvent.submit(document.querySelector('form')!);
+			expect(mockCreateMutate).toHaveBeenCalledWith(
+				expect.objectContaining({ content: '**중요** 항목' }),
+				expect.any(Object)
+			);
+		});
+
+		it('미리보기에서 악성 HTML을 실행 가능한 요소로 렌더링하지 않는다', async () => {
+			render(TodoFormModal, { props: { isOpen: true } });
+			await fireEvent.input(screen.getByLabelText('상세 내용'), {
+				target: { value: '<img src=x onerror=alert(1)> [link](javascript:alert(1))' }
+			});
+			await fireEvent.click(screen.getByRole('button', { name: '미리보기' }));
+			const preview = screen.getByTestId('markdown-preview');
+			expect(preview.querySelector('[onerror]')).toBeNull();
+			expect(preview.querySelector('a[href^="javascript:"]')).toBeNull();
+		});
 		it('모달 패널에 기본 최소 높이(467px)가 지정되어 있다', () => {
 			const { container } = render(TodoFormModal, { props: { isOpen: true } });
 			const panel = container.querySelector('div.fixed > div') as HTMLDivElement;
@@ -277,10 +320,10 @@ describe('TodoFormModal', () => {
 			expect(panel.className).toContain('min-h-[467px]');
 		});
 
-		it('늘어난 높이를 상세 내용 textarea가 흡수하도록 flex-1이 적용되어 있다', () => {
+		it('상세 내용 textarea는 드래그한 높이를 flex 배치에 덮어쓰이지 않는다', () => {
 			const { container } = render(TodoFormModal, { props: { isOpen: true } });
 			const textarea = container.querySelector('#content') as HTMLTextAreaElement;
-			expect(textarea.className).toContain('flex-1');
+			expect(textarea.className).not.toContain('flex-1');
 		});
 	});
 

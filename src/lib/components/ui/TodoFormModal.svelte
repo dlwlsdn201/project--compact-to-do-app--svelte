@@ -8,6 +8,11 @@
 	import { X } from 'lucide-svelte';
 	// Simple Zod integration
 	import { z } from 'zod';
+	import { marked } from 'marked';
+	import DOMPurify from 'dompurify';
+
+	const CONTENT_MIN_HEIGHT_PX = 160;
+	const previewMarkdown = (source: string): string => DOMPurify.sanitize(marked.parse(source, { async: false, breaks: true }) as string);
 
 	let { isOpen = $bindable(false), editingTodo = null, defaultDate = new Date().toISOString() } = $props<{
 		isOpen: boolean;
@@ -23,6 +28,7 @@
 	let priority = $state<Priority>('low');
 	let dueTime = $state('');
 	let error = $state<string | null>(null);
+	let isPreview = $state(false);
 
 	$effect(() => {
 		if (isOpen) {
@@ -38,6 +44,7 @@
 				dueTime = '';
 			}
 			error = null;
+			isPreview = false;
 		}
 	});
 
@@ -111,12 +118,12 @@
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
-		class="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm flex items-start sm:items-center justify-center p-4 pt-16 sm:pt-4 transition-all"
+		class="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm flex items-start sm:items-center justify-center overflow-y-auto p-4 pt-16 sm:pt-4 transition-all"
 		onclick={close}
 	>
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<div
-			class="bg-card text-card-foreground border rounded-2xl w-full max-w-md shadow-lg flex flex-col pt-2 min-h-[467px]"
+			class="bg-card text-card-foreground border rounded-2xl w-full max-w-md shadow-lg flex flex-col pt-2 min-h-[467px] my-auto"
 			onclick={(e) => e.stopPropagation()}
 			in:slide={{ duration: 250, axis: 'y' }}
 			out:slide={{ duration: 200, axis: 'y' }}
@@ -165,13 +172,26 @@
 				</div>
 
 				<div class="flex flex-1 flex-col gap-1.5">
-					<label for="content" class="text-sm font-medium">상세 내용</label>
-					<textarea
-						id="content"
-						bind:value={content}
-						class="flex min-h-[80px] w-full flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-						placeholder="자세한 내용을 기록하세요"
-					></textarea>
+					<div class="flex items-center justify-between">
+						<label for="content" class="text-sm font-medium">상세 내용</label>
+						<div class="flex rounded-md border border-input p-0.5" aria-label="상세 내용 표시 방식">
+							<button type="button" aria-pressed={!isPreview} class="rounded px-2 py-1 text-xs {isPreview ? 'text-muted-foreground' : 'bg-muted font-medium'}" onclick={() => (isPreview = false)}>작성</button>
+							<button type="button" aria-pressed={isPreview} class="rounded px-2 py-1 text-xs {isPreview ? 'bg-muted font-medium' : 'text-muted-foreground'}" onclick={() => (isPreview = true)}>미리보기</button>
+						</div>
+					</div>
+					{#if isPreview}
+						<div data-testid="markdown-preview" aria-label="상세 내용 미리보기" style:height="{CONTENT_MIN_HEIGHT_PX}px" class="markdown-preview w-full overflow-y-auto rounded-md border border-input bg-background px-3 py-2 text-sm break-words">
+							{#if content.trim()}{@html previewMarkdown(content)}{:else}<span class="text-muted-foreground">미리볼 내용이 없습니다.</span>{/if}
+						</div>
+					{:else}
+						<textarea
+							id="content"
+							bind:value={content}
+							style:min-height="{CONTENT_MIN_HEIGHT_PX}px"
+							class="w-full resize-y rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+							placeholder="Markdown으로 자세한 내용을 기록하세요"
+						></textarea>
+					{/if}
 				</div>
 
 				<div class="flex flex-col gap-1.5">
@@ -242,3 +262,18 @@
 		</div>
 	</div>
 {/if}
+
+<style>
+	.markdown-preview :global(h1), .markdown-preview :global(h2), .markdown-preview :global(h3) { font-weight: 600; line-height: 1.4; margin: 0.75em 0 0.35em; }
+	.markdown-preview :global(h1) { font-size: 1.5em; }
+	.markdown-preview :global(h2) { font-size: 1.3em; }
+	.markdown-preview :global(h3) { font-size: 1.15em; }
+	.markdown-preview :global(p), .markdown-preview :global(ul), .markdown-preview :global(ol), .markdown-preview :global(pre), .markdown-preview :global(blockquote) { margin: 0.5em 0; }
+	.markdown-preview :global(ul) { list-style: disc; padding-left: 1.5em; }
+	.markdown-preview :global(ol) { list-style: decimal; padding-left: 1.5em; }
+	.markdown-preview :global(a) { color: var(--primary); text-decoration: underline; }
+	.markdown-preview :global(blockquote) { border-left: 3px solid var(--border); padding-left: 0.75em; color: var(--muted-foreground); }
+	.markdown-preview :global(code) { background: var(--muted); border-radius: 0.25rem; padding: 0.1em 0.25em; }
+	.markdown-preview :global(pre) { overflow-x: auto; background: var(--muted); border-radius: 0.375rem; padding: 0.75em; }
+	.markdown-preview :global(pre code) { padding: 0; }
+</style>
