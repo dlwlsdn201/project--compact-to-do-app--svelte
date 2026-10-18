@@ -8,6 +8,9 @@
 
 	const updateTodo = useUpdateTodo();
 	const deleteTodo = useDeleteTodo();
+	let isDeleteConfirmOpen = $state(false);
+	let isDeleting = $state(false);
+	let hasDeleteError = $state(false);
 
 	function toggleCompletion() {
 		updateTodo.mutate({
@@ -16,11 +19,25 @@
 		} as any);
 	}
 
-	function handleDelete() {
-		if (confirm('정말로 이 할 일을 삭제하시겠습니까?')) {
-			deleteTodo.mutate(todo.id as any);
+	/** @returns 삭제 확인을 표시한다. */
+	const handleDelete = (): void => {
+		hasDeleteError = false;
+		isDeleteConfirmOpen = true;
+	};
+
+	/** @returns 삭제 요청이 성공할 때만 확인을 닫는다. */
+	const handleConfirmDelete = async (): Promise<void> => {
+		isDeleting = true;
+		hasDeleteError = false;
+		try {
+			await deleteTodo.mutateAsync(todo.id);
+			isDeleteConfirmOpen = false;
+		} catch {
+			hasDeleteError = true;
+		} finally {
+			isDeleting = false;
 		}
-	}
+	};
 
 	function restoreToToday() {
 		updateTodo.mutate({
@@ -50,7 +67,7 @@
 </script>
 
 <div
-	class="group relative flex items-start gap-3 p-4 mb-3 rounded-xl border bg-card transition-all hover:shadow-md 
+	class="group relative flex flex-wrap items-start gap-3 p-4 mb-3 rounded-xl border bg-card transition-all hover:shadow-md
 	{todo.is_completed ? 'bg-muted/50 border-transparent shadow-none' : 'border-border shadow-sm'}"
 >
 	<div class="mt-0.5">
@@ -148,6 +165,7 @@
 		{/if}
 
 		<button
+			type="button"
 			class="p-1.5 rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors focus:outline-none focus:ring-2 focus:ring-ring shrink-0"
 			onclick={handleDelete}
 			aria-label="Delete todo"
@@ -156,4 +174,14 @@
 		</button>
 		</div>
 	</div>
+	{#if isDeleteConfirmOpen}
+		<div role="alertdialog" aria-label="할 일 삭제 확인" class="basis-full w-full rounded-md border border-destructive/40 bg-card p-3 text-sm">
+			<p>정말로 이 할 일을 삭제하시겠습니까?</p>
+			{#if hasDeleteError}<p role="alert" class="mt-2 text-destructive">삭제하지 못했습니다. 다시 시도해 주세요.</p>{/if}
+			<div class="mt-3 flex justify-end gap-2">
+				<button type="button" disabled={isDeleting} class="rounded-md border border-input px-3 py-1.5 hover:bg-muted disabled:opacity-50" onclick={() => (isDeleteConfirmOpen = false)}>취소</button>
+				<button type="button" disabled={isDeleting} class="rounded-md bg-destructive px-3 py-1.5 text-destructive-foreground disabled:opacity-50" onclick={handleConfirmDelete}>{isDeleting ? '삭제 중...' : '삭제 확정'}</button>
+			</div>
+		</div>
+	{/if}
 </div>

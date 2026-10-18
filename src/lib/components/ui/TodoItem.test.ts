@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, fireEvent } from '@testing-library/svelte';
+import { render, fireEvent, screen, waitFor } from '@testing-library/svelte';
 import TodoItem from './TodoItem.svelte';
 import type { Todo } from '$lib/types/todo';
 
@@ -9,11 +9,11 @@ import type { Todo } from '$lib/types/todo';
 // Supabase 연결 및 QueryClient 의존성을 제거한다.
 // ─────────────────────────────────────────────
 const mockUpdateMutate = vi.fn();
-const mockDeleteMutate = vi.fn();
+const mockDeleteMutateAsync = vi.fn();
 
 vi.mock('$lib/features/todo/todoQueries', () => ({
 	useUpdateTodo: () => ({ mutate: mockUpdateMutate, isPending: false }),
-	useDeleteTodo: () => ({ mutate: mockDeleteMutate, isPending: false }),
+	useDeleteTodo: () => ({ mutateAsync: mockDeleteMutateAsync, isPending: false }),
 	useCreateTodo: () => ({ mutate: vi.fn(), isPending: false })
 }));
 
@@ -39,7 +39,8 @@ const futureDate = new Date(Date.now() + 7 * 86400000).toISOString();
 describe('TodoItem', () => {
 	beforeEach(() => {
 		mockUpdateMutate.mockClear();
-		mockDeleteMutate.mockClear();
+		mockDeleteMutateAsync.mockReset();
+		mockDeleteMutateAsync.mockResolvedValue(undefined);
 		vi.restoreAllMocks();
 	});
 
@@ -85,6 +86,20 @@ describe('TodoItem', () => {
 	// Interaction
 	// ──────────────────────────────────────────
 	describe('Interaction', () => {
+		it('휴지통 클릭 시 화면 안에 삭제 확인을 표시한다', async () => {
+			render(TodoItem, { props: { todo: baseTodo } });
+			await fireEvent.click(screen.getByRole('button', { name: 'Delete todo' }));
+			expect(screen.getByRole('alertdialog')).toHaveTextContent('정말로 이 할 일을 삭제하시겠습니까?');
+		});
+
+		it('삭제 실패 시 오류를 표시하고 확인창을 유지한다', async () => {
+			mockDeleteMutateAsync.mockRejectedValue(new Error('삭제 권한 없음'));
+			render(TodoItem, { props: { todo: baseTodo } });
+			await fireEvent.click(screen.getByRole('button', { name: 'Delete todo' }));
+			await fireEvent.click(screen.getByRole('button', { name: '삭제 확정' }));
+			await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('삭제하지 못했습니다'));
+			expect(screen.getByRole('alertdialog')).toBeInTheDocument();
+		});
 		it('체크박스 버튼 클릭 시 updateTodo.mutate가 is_completed 반전 값으로 호출된다', async () => {
 			const { getByRole } = render(TodoItem, { props: { todo: baseTodo } });
 			const checkbox = getByRole('button', { name: /toggle completion/i });
@@ -107,21 +122,21 @@ describe('TodoItem', () => {
 			);
 		});
 
-		it('삭제 버튼 클릭 후 confirm 승인 → deleteTodo.mutate가 todo id로 호출된다', async () => {
-			vi.spyOn(window, 'confirm').mockReturnValue(true);
+		it('삭제 확인 후 삭제 요청에 할 일 id를 전달한다', async () => {
 			const { getByRole } = render(TodoItem, { props: { todo: baseTodo } });
 			const deleteBtn = getByRole('button', { name: /delete todo/i });
 			await fireEvent.click(deleteBtn);
-			expect(window.confirm).toHaveBeenCalled();
-			expect(mockDeleteMutate).toHaveBeenCalledWith('todo-1');
+			await fireEvent.click(getByRole('button', { name: '삭제 확정' }));
+			expect(mockDeleteMutateAsync).toHaveBeenCalledWith('todo-1');
 		});
 
-		it('삭제 버튼 클릭 후 confirm 취소 → deleteTodo.mutate가 호출되지 않는다', async () => {
-			vi.spyOn(window, 'confirm').mockReturnValue(false);
+		it('삭제 취소 시 요청하지 않는다', async () => {
 			const { getByRole } = render(TodoItem, { props: { todo: baseTodo } });
 			const deleteBtn = getByRole('button', { name: /delete todo/i });
 			await fireEvent.click(deleteBtn);
-			expect(mockDeleteMutate).not.toHaveBeenCalled();
+			await fireEvent.click(getByRole('button', { name: '취소' }));
+			expect(mockDeleteMutateAsync).not.toHaveBeenCalled();
+			expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
 		});
 
 		it('수정 버튼 클릭 시 onEdit(todo)가 호출된다', async () => {
