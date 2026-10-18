@@ -18,8 +18,9 @@
 
 ### Interaction
 - [x] **완료 토글**: 체크박스 버튼 클릭 시 `updateTodo.mutate({ id, updates: { is_completed: !current } })` 호출
-- [x] **삭제 확인**: 삭제 버튼 클릭 → `window.confirm` 표시 → 승인 시 `deleteTodo.mutate(id)` 호출
-- [x] **삭제 취소**: `confirm` 취소 시 `deleteTodo.mutate`가 호출되지 않음
+- [x] **삭제 확인**: 삭제 버튼 클릭 → 항목 안의 확인 영역 표시 → 승인 시 `deleteTodo.mutateAsync(id)` 호출
+- [x] **삭제 취소**: 확인 영역의 취소 버튼 클릭 시 삭제 요청을 하지 않음
+- [x] **삭제 실패**: 오류 안내를 보여주고 확인 영역을 유지해 재시도할 수 있음
 - [x] **수정 콜백**: 수정 버튼 클릭 시 `onEdit(todo)` 호출
 
 ### Edge Case
@@ -35,7 +36,7 @@
 
 **Mock 전략 (테스트 파일)**:
 - `$lib/features/todo/todoQueries` 전체를 `vi.mock`으로 대체하여 Supabase/QueryClient 의존성 제거
-- `window.confirm`은 `vi.spyOn`으로 제어
+- 삭제 요청의 성공·실패는 `mutateAsync` 모킹으로 제어
 
 ### 마감 시각
 - [x] **미지정**: `due_time`이 없으면 배지를 표시하지 않음

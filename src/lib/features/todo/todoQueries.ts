@@ -64,8 +64,6 @@ export function useDeleteTodo() {
 
 	return createMutation(() => ({
 		mutationFn: (id: string) => getApi().deleteTodo(id),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: QUERY_KEYS.todos });
-		}
+		onSuccess: () => queryClient.invalidateQueries({ queryKey: QUERY_KEYS.todos })
 	}));
 }
