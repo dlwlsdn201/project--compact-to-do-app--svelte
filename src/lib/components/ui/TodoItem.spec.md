@@ -7,6 +7,7 @@
 
 단일 Todo 항목을 렌더링하고 완료 토글 / 수정 / 삭제 인터랙션을 처리하는 컴포넌트.
 `isHistoryArea=true`일 때는 기한이 지난 항목을 오늘 또는 내일로 복구하는 버튼을 추가로 노출한다.
+`moveTo='tomorrow'`인 오늘 카드에는 "내일 하기", `moveTo='today'`인 내일 카드에는 "오늘 하기"를 같은 위치에 노출한다. 완료된 항목에는 이동 버튼을 표시하지 않는다.
 우선순위(high/medium/low)에 따라 색상 뱃지를 표시하며, `showDate=true`이면 등록일을 함께 보여준다.
 
 ## 🧪 Test Scenarios (Red Phase)
@@ -25,6 +26,7 @@
 
 ### Edge Case
 - [x] **복구 버튼 노출**: `isHistoryArea=true` + 미완료 → "오늘 하기", "내일 하기" 버튼 표시
+- [x] **오늘·내일 이동**: 각 화면의 미완료 카드에 반대 날짜로 이동하는 버튼을 표시하고 날짜를 변경
 - [x] **복구 버튼 숨김**: `isHistoryArea=false` → 복구 버튼 없음
 - [x] **완료 시 복구 없음**: `isHistoryArea=true` + 완료 → 복구 버튼 없음
 - [x] **날짜 표시**: `showDate=true` → 등록일 렌더링

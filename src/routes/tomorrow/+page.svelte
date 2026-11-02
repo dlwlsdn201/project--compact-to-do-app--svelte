@@ -71,7 +71,7 @@
 			{/if}
 
 			{#each uncompletedTodos as todo (todo.id)}
-				<TodoItem {todo} onEdit={handleEdit} />
+				<TodoItem {todo} moveTo="today" onEdit={handleEdit} />
 			{/each}
 
 			{#if completedTodos.length > 0}
