@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, fireEvent, screen, waitFor } from '@testing-library/svelte';
 import TodoItem from './TodoItem.svelte';
 import type { Todo } from '$lib/types/todo';
+import { isToday, isTomorrow } from '$lib/utils/date';
 
 // ─────────────────────────────────────────────
 // Mock: TanStack Query hooks
@@ -189,6 +190,25 @@ describe('TodoItem', () => {
 	});
 
 	describe('Edge Case', () => {
+		it('오늘 카드의 미완료 항목은 내일 하기만 표시하고 날짜를 내일로 변경한다', async () => {
+			render(TodoItem, { props: { todo: baseTodo, moveTo: 'tomorrow' } });
+			expect(screen.queryByRole('button', { name: '오늘 하기' })).not.toBeInTheDocument();
+			await fireEvent.click(screen.getByRole('button', { name: '내일 하기' }));
+			expect(isTomorrow(mockUpdateMutate.mock.calls[0][0].updates.due_date)).toBe(true);
+		});
+
+		it('내일 카드의 미완료 항목은 오늘 하기만 표시하고 날짜를 오늘로 변경한다', async () => {
+			render(TodoItem, { props: { todo: baseTodo, moveTo: 'today' } });
+			expect(screen.queryByRole('button', { name: '내일 하기' })).not.toBeInTheDocument();
+			await fireEvent.click(screen.getByRole('button', { name: '오늘 하기' }));
+			expect(isToday(mockUpdateMutate.mock.calls[0][0].updates.due_date)).toBe(true);
+		});
+
+		it('완료된 항목에는 이동 버튼을 표시하지 않는다', () => {
+			render(TodoItem, { props: { todo: { ...baseTodo, is_completed: true }, moveTo: 'tomorrow' } });
+			expect(screen.queryByRole('button', { name: '내일 하기' })).not.toBeInTheDocument();
+		});
+
 		it('isHistoryArea=true + 미완료 → "오늘 하기", "내일 하기" 버튼이 표시된다', () => {
 			const { getByText } = render(TodoItem, { props: { todo: baseTodo, isHistoryArea: true } });
 			expect(getByText('오늘 하기')).toBeInTheDocument();

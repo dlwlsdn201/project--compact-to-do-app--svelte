@@ -4,7 +4,7 @@
 	import { Trash2, Pencil, Clock } from 'lucide-svelte';
 	import { formatDueTime, isOverdue } from '$lib/utils/date';
 
-	let { todo, showDate = false, isHistoryArea = false, onEdit } = $props<{ todo: Todo; showDate?: boolean; isHistoryArea?: boolean; onEdit?: (todo: Todo) => void }>();
+	let { todo, showDate = false, isHistoryArea = false, moveTo, onEdit } = $props<{ todo: Todo; showDate?: boolean; isHistoryArea?: boolean; moveTo?: 'today' | 'tomorrow'; onEdit?: (todo: Todo) => void }>();
 
 	const updateTodo = useUpdateTodo();
 	const deleteTodo = useDeleteTodo();
@@ -136,20 +136,24 @@
 	</div>
 
 	<div class="flex flex-col items-end sm:items-center gap-2 flex-shrink-0 ml-1">
-		{#if isHistoryArea && !todo.is_completed}
+		{#if (isHistoryArea || moveTo) && !todo.is_completed}
 			<div class="flex flex-col sm:flex-row gap-1">
+				{#if isHistoryArea || moveTo === 'today'}
 				<button
 					class="px-2 py-1 bg-yellow-100 text-yellow-800 text-[10px] rounded hover:bg-yellow-200 transition-colors dark:bg-yellow-900/40 dark:text-yellow-400 font-medium border border-yellow-200 dark:border-yellow-800 whitespace-nowrap"
 					onclick={restoreToToday}
 				>
 					오늘 하기
 				</button>
+				{/if}
+				{#if isHistoryArea || moveTo === 'tomorrow'}
 				<button
 					class="px-2 py-1 bg-blue-100 text-blue-800 text-[10px] rounded hover:bg-blue-200 transition-colors dark:bg-blue-900/40 dark:text-blue-400 font-medium border border-blue-200 dark:border-blue-800 whitespace-nowrap"
 					onclick={restoreToTomorrow}
 				>
 					내일 하기
 				</button>
+				{/if}
 			</div>
 		{/if}
 
