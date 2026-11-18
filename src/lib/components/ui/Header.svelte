@@ -10,6 +10,7 @@
 		setLastAcknowledgedVersion
 	} from '$lib/utils/releaseAcknowledgement';
 	import ReleaseNotesDialog from '$lib/components/ui/ReleaseNotesDialog.svelte';
+	import DigitalClock from '$lib/components/ui/DigitalClock.svelte';
 
 	/**
 	 * 상단 헤더: 테마·로그아웃·버전 뱃지(Megaphone = 릴리즈 노트 진입, 미읽음 시 N 도트).
@@ -38,8 +39,8 @@
 </script>
 
 <header class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-	<div class="container flex h-14 items-center max-w-2xl mx-auto px-4 justify-between">
-		<div class="flex items-center gap-2">
+	<div class="container mx-auto grid h-14 max-w-2xl grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center px-4">
+		<div class="col-start-1 row-start-1 flex items-center gap-2 clock-visible:max-sm:gap-1">
 			<div class="flex items-center">
 				<span class="font-bold text-xl tracking-tight text-yellow-500">Todo</span>
 				<span class="font-semibold text-xl tracking-tight">morrow</span>
@@ -54,13 +55,13 @@
 			>
 				v{version}
 				<Megaphone 
-					class="h-3.5 w-3.5 shrink-0 opacity-90 group-hover:opacity-100"
+					class="h-3.5 w-3.5 shrink-0 opacity-90 group-hover:opacity-100 clock-visible:max-sm:hidden"
 					aria-hidden="true"
 				/>
 				{#if hasUnreadRelease}
 					<!-- 미읽음: N = New. 아이콘·텍스트와 겹치지 않게 우상단 고정 -->
 					<span
-						class="absolute -top-1 -right-3 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-0.5 text-[9px] font-extrabold leading-none text-destructive-foreground ring-2 ring-background"
+						class="absolute -top-1 -right-3 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-0.5 text-[9px] font-extrabold leading-none text-destructive-foreground ring-2 ring-background clock-visible:max-sm:-right-2"
 						aria-hidden="true"
 					>
 						N
@@ -68,23 +69,26 @@
 				{/if}
 			</button>
 		</div>
-		<div class="flex items-center gap-3 md:gap-4">
+		<div class="col-start-2 row-start-1 hidden justify-self-center clock-visible:block">
+			<DigitalClock />
+		</div>
+		<div class="col-start-3 row-start-1 flex min-w-0 items-center justify-end gap-3 md:gap-4">
 			{#if authStore.user}
-				<div class="flex items-center gap-2">
-					<span class="text-sm font-medium">{authStore.username}님</span>
+				<div class="flex min-w-0 items-center gap-2">
+					<span class="truncate text-sm font-medium">{authStore.username}님</span>
 					<button
-						class="text-xs text-muted-foreground hover:text-foreground transition-colors"
+						class="shrink-0 text-xs whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground"
 						onclick={() => authStore.logout()}
 					>
 						로그아웃
 					</button>
 				</div>
 			{:else if authStore.isGuest}
-				<span class="text-sm font-medium">게스트 님</span>
+				<span class="text-sm font-medium whitespace-nowrap">게스트 님</span>
 			{/if}
 
 			<button
-				class="inline-flex items-center justify-center rounded-md w-9 h-9 transition-colors hover:bg-accent hover:text-accent-foreground"
+				class="inline-flex size-9 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground"
 				onclick={() => themeStore.toggle()}
 			>
 				{#if themeStore.isDark}

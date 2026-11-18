@@ -1,10 +1,19 @@
 <script lang="ts">
-	import type { Todo, Priority } from '$lib/types/todo';
+	import type { Todo } from '$lib/types/todo';
 	import { useUpdateTodo, useDeleteTodo } from '$lib/features/todo/todoQueries';
+	import { getTodoPriorityStyle } from '$lib/features/todo/todoPriority';
+	import { Dialog } from 'bits-ui';
 	import { Trash2, Pencil, Clock } from 'lucide-svelte';
+	import TodoPreviewModal from '$lib/components/ui/TodoPreviewModal.svelte';
 	import { formatDueTime, isOverdue } from '$lib/utils/date';
 
-	let { todo, showDate = false, isHistoryArea = false, moveTo, onEdit } = $props<{ todo: Todo; showDate?: boolean; isHistoryArea?: boolean; moveTo?: 'today' | 'tomorrow'; onEdit?: (todo: Todo) => void }>();
+	let { todo, showDate = false, isHistoryArea = false, moveTo, onEdit }: {
+		todo: Todo;
+		showDate?: boolean;
+		isHistoryArea?: boolean;
+		moveTo?: 'today' | 'tomorrow';
+		onEdit?: (todo: Todo) => void;
+	} = $props();
 
 	const updateTodo = useUpdateTodo();
 	const deleteTodo = useDeleteTodo();
@@ -59,20 +68,16 @@
 	/** 마감 시각이 지났고 아직 완료되지 않은 항목만 경고로 강조한다. */
 	let isDueTimePassed = $derived(!todo.is_completed && isOverdue(todo.due_date, todo.due_time));
 
-	const priorityColors: Record<Priority, string> = {
-		low: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-		medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
-		high: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-	};
+	const priority = $derived(getTodoPriorityStyle(todo.priority));
 </script>
 
 <div
-	class="group relative flex flex-wrap items-start gap-3 p-4 mb-3 rounded-xl border bg-card transition-all hover:shadow-md
+	class="group relative isolate flex flex-wrap items-start gap-3 p-4 mb-3 rounded-xl border bg-card transition-all hover:shadow-md
 	{todo.is_completed ? 'bg-muted/50 border-transparent shadow-none' : 'border-border shadow-sm'}"
 >
 	<div class="mt-0.5">
 		<button
-			class="flex h-5 w-5 items-center justify-center rounded border-2 transition-colors
+			class="relative z-10 flex h-5 w-5 items-center justify-center rounded border-2 transition-colors
 			{todo.is_completed ? 'bg-yellow-500 border-yellow-500 text-black' : 'border-muted-foreground'}"
 			onclick={toggleCompletion}
 			aria-label="Toggle completion state"
@@ -93,6 +98,16 @@
 			{/if}
 		</button>
 	</div>
+
+	<Dialog.Root>
+		<!-- 기존 작업 버튼은 이 클릭 영역 위에 배치한다. -->
+		<Dialog.Trigger
+			type="button"
+			class="absolute inset-0 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+			aria-label={`할 일 미리보기: ${todo.title}`}
+		/>
+		<TodoPreviewModal {todo} />
+	</Dialog.Root>
 
 	<div class="flex-1 min-w-0 flex flex-col gap-1">
 		<div class="flex flex-col w-full">
@@ -129,8 +144,8 @@
 					{dueTimeLabel}{isDueTimePassed ? ' 마감' : ''}
 				</span>
 			{/if}
-			<span class="text-[10px] font-bold px-2 py-0.5 rounded-[4px] {priorityColors[todo.priority as Priority]}">
-				{todo.priority === 'high' ? '우선순위 높음' : todo.priority === 'medium' ? '우선순위 보통' : '우선순위 낮음'}
+			<span class="text-[10px] font-bold px-2 py-0.5 rounded-[4px] {priority.badgeClass} {priority.textClass}">
+				우선순위 {priority.label}
 			</span>
 		</div>
 	</div>
@@ -140,7 +155,7 @@
 			<div class="flex flex-col sm:flex-row gap-1">
 				{#if isHistoryArea || moveTo === 'today'}
 				<button
-					class="px-2 py-1 bg-yellow-100 text-yellow-800 text-[10px] rounded hover:bg-yellow-200 transition-colors dark:bg-yellow-900/40 dark:text-yellow-400 font-medium border border-yellow-200 dark:border-yellow-800 whitespace-nowrap"
+					class="relative z-10 px-2 py-1 bg-yellow-100 text-yellow-800 text-[10px] rounded hover:bg-yellow-200 transition-colors dark:bg-yellow-900/40 dark:text-yellow-400 font-medium border border-yellow-200 dark:border-yellow-800 whitespace-nowrap"
 					onclick={restoreToToday}
 				>
 					오늘 하기
@@ -148,7 +163,7 @@
 				{/if}
 				{#if isHistoryArea || moveTo === 'tomorrow'}
 				<button
-					class="px-2 py-1 bg-blue-100 text-blue-800 text-[10px] rounded hover:bg-blue-200 transition-colors dark:bg-blue-900/40 dark:text-blue-400 font-medium border border-blue-200 dark:border-blue-800 whitespace-nowrap"
+					class="relative z-10 px-2 py-1 bg-blue-100 text-blue-800 text-[10px] rounded hover:bg-blue-200 transition-colors dark:bg-blue-900/40 dark:text-blue-400 font-medium border border-blue-200 dark:border-blue-800 whitespace-nowrap"
 					onclick={restoreToTomorrow}
 				>
 					내일 하기
@@ -160,7 +175,7 @@
 		<div class="flex flex-row w-full justify-end gap-x-1">
 		{#if onEdit}
 			<button
-				class="p-1.5 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring shrink-0"
+				class="relative z-10 p-1.5 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring shrink-0"
 				onclick={() => onEdit(todo)}
 				aria-label="Edit todo"
 			>
@@ -170,7 +185,7 @@
 
 		<button
 			type="button"
-			class="p-1.5 rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors focus:outline-none focus:ring-2 focus:ring-ring shrink-0"
+			class="relative z-10 p-1.5 rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors focus:outline-none focus:ring-2 focus:ring-ring shrink-0"
 			onclick={handleDelete}
 			aria-label="Delete todo"
 		>
