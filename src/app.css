@@ -2,6 +2,7 @@
 
 @custom-variant mobile (@media (max-width: 769px));
 @custom-variant tablet (@media (max-width: 1025px));
+@custom-variant clock-visible (@media (width > 480px));
 
 @theme {
   --color-background: var(--background);

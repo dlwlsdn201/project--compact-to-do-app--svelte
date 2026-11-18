@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, fireEvent, screen, waitFor } from '@testing-library/svelte';
+import { render, fireEvent, screen, waitFor, within } from '@testing-library/svelte';
 import TodoItem from './TodoItem.svelte';
 import type { Todo } from '$lib/types/todo';
 import { isToday, isTomorrow } from '$lib/utils/date';
@@ -10,10 +10,11 @@ import { isToday, isTomorrow } from '$lib/utils/date';
 // Supabase 연결 및 QueryClient 의존성을 제거한다.
 // ─────────────────────────────────────────────
 const mockUpdateMutate = vi.fn();
+const mockUpdateMutateAsync = vi.fn();
 const mockDeleteMutateAsync = vi.fn();
 
 vi.mock('$lib/features/todo/todoQueries', () => ({
-	useUpdateTodo: () => ({ mutate: mockUpdateMutate, isPending: false }),
+	useUpdateTodo: () => ({ mutate: mockUpdateMutate, mutateAsync: mockUpdateMutateAsync, isPending: false }),
 	useDeleteTodo: () => ({ mutateAsync: mockDeleteMutateAsync, isPending: false }),
 	useCreateTodo: () => ({ mutate: vi.fn(), isPending: false })
 }));
@@ -40,6 +41,8 @@ const futureDate = new Date(Date.now() + 7 * 86400000).toISOString();
 describe('TodoItem', () => {
 	beforeEach(() => {
 		mockUpdateMutate.mockClear();
+		mockUpdateMutateAsync.mockReset();
+		mockUpdateMutateAsync.mockResolvedValue(undefined);
 		mockDeleteMutateAsync.mockReset();
 		mockDeleteMutateAsync.mockResolvedValue(undefined);
 		vi.restoreAllMocks();
@@ -146,6 +149,49 @@ describe('TodoItem', () => {
 			const editBtn = getByRole('button', { name: /edit todo/i });
 			await fireEvent.click(editBtn);
 			expect(onEdit).toHaveBeenCalledWith(baseTodo);
+		});
+	});
+
+	describe('미리보기', () => {
+		it('미리보기 체크박스를 클릭하면 변경된 마크다운을 저장한다', async () => {
+			const todo = { ...baseTodo, content: '- [ ] 스키마 확인' };
+			const { getByRole, findByRole } = render(TodoItem, { props: { todo } });
+			await fireEvent.click(getByRole('button', { name: `할 일 미리보기: ${todo.title}` }));
+			const preview = within(await findByRole('dialog', { name: todo.title }));
+			await fireEvent.click(preview.getByRole('checkbox', { name: '체크 항목 1, 미완료' }));
+
+			expect(mockUpdateMutateAsync).toHaveBeenCalledWith({
+				id: todo.id,
+				updates: { content: '- [x] 스키마 확인' }
+			});
+		});
+
+		it('카드 선택 시 상세 내용을 마크다운으로 렌더링하고 마감 날짜와 우선순위를 표시한다', async () => {
+			const todo = { ...baseTodo, content: '- **스키마 검토**\n- 마이그레이션 실행' };
+			const { getByRole, findByRole } = render(TodoItem, { props: { todo } });
+			await fireEvent.click(getByRole('button', { name: `할 일 미리보기: ${todo.title}` }));
+			const preview = within(await findByRole('dialog', { name: todo.title }));
+
+			expect(preview.getByRole('list')).toHaveTextContent('스키마 검토');
+			expect(preview.getByRole('strong')).toHaveTextContent('스키마 검토');
+			expect(preview.getByText('2026. 4. 14.')).toHaveAttribute('datetime', todo.due_date);
+			expect(preview.getByText('높음')).toHaveClass('text-red-800');
+		});
+
+		it('원문 HTML을 텍스트로 표시하고 위험한 URL을 비활성화한다', async () => {
+			const todo = {
+				...baseTodo,
+				content: '<img src="/image.png">\n\n[안전하지 않은 링크](javascript:alert%281%29)',
+				due_date: null
+			};
+			const { getByRole, findByRole } = render(TodoItem, { props: { todo } });
+			await fireEvent.click(getByRole('button', { name: `할 일 미리보기: ${todo.title}` }));
+			const preview = within(await findByRole('dialog', { name: todo.title }));
+
+			expect(preview.queryByRole('img')).not.toBeInTheDocument();
+			expect(preview.getByText('<img src="/image.png">')).toBeInTheDocument();
+			expect(preview.getByText('안전하지 않은 링크')).toHaveAttribute('href', '');
+			expect(preview.getByText('미설정')).toBeInTheDocument();
 		});
 	});
 
